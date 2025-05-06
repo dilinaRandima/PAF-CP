@@ -9,6 +9,7 @@ import MediaUpload from '../components/MediaUpload';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+
 // Replace date-fns with a simple function
 const formatTimeAgo = (dateString) => {
   if (!dateString) return 'Recently';
@@ -26,6 +27,32 @@ const formatTimeAgo = (dateString) => {
   if (months < 12) return `${months} month${months > 1 ? 's' : ''} ago`;
   const years = Math.floor(months / 12);
   return `${years} year${years > 1 ? 's' : ''} ago`;
+};
+
+const LoadingSkeletons = () => {
+  return (
+      <>
+        {[1, 2, 3].map(i => (
+            <Card key={i} className="custom-card mb-4">
+              <Card.Header className="bg-white">
+                <div className="d-flex align-items-center">
+                  <div className="bg-secondary opacity-25 rounded-circle me-2" style={{width: 40, height: 40}}></div>
+                  <div className="flex-grow-1">
+                    <div className="bg-secondary opacity-25" style={{width: '60%', height: 16, borderRadius: 4}}></div>
+                    <div className="bg-secondary opacity-25 mt-1" style={{width: '30%', height: 12, borderRadius: 4}}></div>
+                  </div>
+                </div>
+              </Card.Header>
+              <Card.Body>
+                <div className="bg-secondary opacity-25 mb-3" style={{width: '40%', height: 24, borderRadius: 4}}></div>
+                <div className="bg-secondary opacity-25 mb-3" style={{width: '100%', height: 200, borderRadius: 4}}></div>
+                <div className="bg-secondary opacity-25 mb-2" style={{width: '100%', height: 16, borderRadius: 4}}></div>
+                <div className="bg-secondary opacity-25" style={{width: '80%', height: 16, borderRadius: 4}}></div>
+              </Card.Body>
+            </Card>
+        ))}
+      </>
+  );
 };
 
 const Feed = () => {
@@ -488,12 +515,13 @@ const Feed = () => {
 
   if (loading) {
     return (
-      <Container className="py-5 text-center">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-        <p className="mt-2">Loading posts...</p>
-      </Container>
+        <Container className="py-4">
+          <Row>
+            <Col lg={8} className="mx-auto">
+              <LoadingSkeletons />
+            </Col>
+          </Row>
+        </Container>
     );
   }
 
