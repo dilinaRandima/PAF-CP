@@ -181,7 +181,7 @@ const GroupDetail = () => {
       setNewPost({ content: '', mediaUrl: '', mediaType: '' });
     } catch (err) {
       console.error('Error creating post:', err);
-      alert('Failed to create post. Please try again.');
+      alert('Failed to create post');
     } finally {
       setSubmitting(false);
     }
@@ -199,7 +199,7 @@ const GroupDetail = () => {
       setPosts(prev => prev.filter(post => post.id !== postId));
     } catch (err) {
       console.error('Error deleting post:', err);
-      alert('Failed to delete post. Please try again.');
+      alert('Failed to delete post');
     }
   };
 
