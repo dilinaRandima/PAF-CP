@@ -72,6 +72,8 @@ const Feed = () => {
   const [editingComment, setEditingComment] = useState({ id: null, text: '' });
   // Add state to track bookmarked posts
   const [bookmarkedPosts, setBookmarkedPosts] = useState({});
+  //ADD post search
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchPosts();
@@ -524,6 +526,17 @@ const Feed = () => {
         </Container>
     );
   }
+
+  const getFilteredPosts = () => {
+    if (!searchTerm.trim()) return posts;
+
+    return posts.filter(post =>
+        post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.contentDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.cuisineType?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+
 
   if (error) {
     return (
