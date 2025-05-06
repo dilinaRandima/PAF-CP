@@ -42,6 +42,10 @@ const Bookmarks = () => {
   };
 
   const handleModalClose = () => {
+    if (hasUnsavedChanges() && !window.confirm('You have unsaved changes. Are you sure you want to close?')) {
+      return;
+    }
+
     setShowModal(false);
     setEditingBookmark(null);
     setFormData({
@@ -107,6 +111,18 @@ const Bookmarks = () => {
       setSubmitting(false);
     }
 
+  };
+
+  const hasUnsavedChanges = () => {
+    if (!editingBookmark) {
+      return formData.title || formData.resourceId || formData.note || formData.tags;
+    }
+
+    return formData.title !== (editingBookmark.title || '') ||
+        formData.resourceId !== (editingBookmark.resourceId || '') ||
+        formData.resourceType !== (editingBookmark.resourceType || 'external') ||
+        formData.note !== (editingBookmark.note || '') ||
+        formData.tags !== (editingBookmark.tags ? editingBookmark.tags.join(', ') : '');
   };
 
   const handleDelete = async (bookmarkId) => {
