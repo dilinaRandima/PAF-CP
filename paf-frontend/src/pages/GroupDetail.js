@@ -103,7 +103,7 @@ const GroupDetail = () => {
         memberIds: updatedMembers
       }));
     } catch (err) {
-      console.error('Error joining group:', err);
+      console.error('Error', err);
       alert('Failed to join group. Please try again.');
     }
   };
@@ -111,7 +111,7 @@ const GroupDetail = () => {
   const handleLeaveGroup = async () => {
     if (!group || isCreator) return;
     
-    if (!window.confirm('Are you sure you want to leave this group?')) {
+    if (!window.confirm('Are you sure you want to leave this group? Y or N')) {
       return;
     }
     
