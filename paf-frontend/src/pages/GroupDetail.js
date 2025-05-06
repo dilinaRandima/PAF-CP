@@ -65,7 +65,7 @@ const GroupDetail = () => {
       await fetchUsers([...new Set(userIds)]);
       
     } catch (err) {
-      console.error('Error fetching group data:', err);
+      console.error('Error:', err);
       setError('Failed to load group data. Please try again later.');
     } finally {
       setLoading(false);
