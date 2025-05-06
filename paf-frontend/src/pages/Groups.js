@@ -140,7 +140,7 @@ const Groups = () => {
                     </Card.Text>
                     <div className="mb-3">
                       <small className="text-muted">
-                        {group.memberIds?.length || 0} members
+                        {group.memberIds?.length || 0} members count
                       </small>
                     </div>
                     {group.tags && group.tags.length > 0 && (
@@ -176,7 +176,7 @@ const Groups = () => {
           <Card.Body>
             <FaUsers size={50} className="text-muted mb-3" />
             <h4>No Groups Found</h4>
-            <p className="text-muted">Try clearing your search or create your own group!</p>
+            <p className="text-muted">create your own group!</p>
             <Button 
               as={Link} 
               to="/create-group" 
