@@ -89,7 +89,7 @@ const Groups = () => {
 
   return (
     <Container className="py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex justify-content-between align-items-center mb-5">
         <h2>Cooking Communities</h2>
         <Button 
           as={Link} 
@@ -106,7 +106,7 @@ const Groups = () => {
         <FaSearch className="position-absolute" style={{ left: '15px', top: '12px', color: '#aaa' }} />
         <input
           type="text"
-          placeholder="Search groups..."
+          placeholder="Search..."
           className="form-control ps-5"
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
