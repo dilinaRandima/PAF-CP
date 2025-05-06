@@ -46,15 +46,12 @@ const GroupDetail = () => {
       setLoading(true);
       setError(null);
       
-      // Fetch group details
       const groupResponse = await groupService.getGroupById(groupId);
       setGroup(groupResponse.data);
       
-      // Fetch group posts
       const postsResponse = await groupPostService.getPostsByGroupId(groupId);
       setPosts(postsResponse.data);
       
-      // Get all user IDs from group and posts
       const userIds = [
         groupResponse.data.creatorId,
         ...groupResponse.data.memberIds,
@@ -66,7 +63,7 @@ const GroupDetail = () => {
       
     } catch (err) {
       console.error('Error:', err);
-      setError('Failed to load group data. Please try again later.');
+      setError('Failed to load group data');
     } finally {
       setLoading(false);
     }
