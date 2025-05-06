@@ -10,6 +10,7 @@ const Bookmarks = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
@@ -76,6 +77,7 @@ const Bookmarks = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     
     try {
       const tagsArray = formData.tags
@@ -101,7 +103,10 @@ const Bookmarks = () => {
     } catch (err) {
       console.error('Error saving bookmark:', err);
       setError('Failed to save bookmark. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
+
   };
 
   const handleDelete = async (bookmarkId) => {
