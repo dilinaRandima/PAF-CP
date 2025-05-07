@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Spinner, Alert, Form, Modal, Badge } from 'react-bootstrap';
 import { AuthContext } from '../context/AuthContext';
@@ -12,6 +12,7 @@ const Bookmarks = () => {
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [sortBy, setSortBy] = useState('createdAt');
+  const searchInputRef = useRef(null);
   const [sortDirection, setSortDirection] = useState('desc');
   const [editingBookmark, setEditingBookmark] = useState(null);
   const [formData, setFormData] = useState({
