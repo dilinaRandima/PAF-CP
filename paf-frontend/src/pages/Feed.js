@@ -45,6 +45,8 @@ const Feed = () => {
   const [editingComment, setEditingComment] = useState({ id: null, text: '' });
   // Add state to track bookmarked posts
   const [bookmarkedPosts, setBookmarkedPosts] = useState({});
+  // Add state to track edited comments
+  const [editedComments, setEditedComments] = useState({});
 
   useEffect(() => {
     fetchPosts();
@@ -282,6 +284,12 @@ const Feed = () => {
       };
       
       await commentService.updateComment(editingComment.id, commentData, currentUser.id);
+      
+      // Mark comment as edited
+      setEditedComments(prev => ({
+        ...prev,
+        [editingComment.id]: true
+      }));
       
       // Update comments state
       setComments(prev => ({
@@ -748,7 +756,7 @@ const Feed = () => {
                               <strong>{users[comment.userId]?.username || 'Unknown User'}</strong>
                               <div>
                                 <small className="text-muted me-2">
-                                  {formatTimeAgo(comment.timestamp)}
+                                  {formatTimeAgo(comment.timestamp)} {editedComments[comment.id] && "(Edited)"}
                                 </small>
                                 {/* Show edit button only to comment author */}
                                 {comment.userId === currentUser.id && (
