@@ -47,9 +47,30 @@ const Feed = () => {
   const [bookmarkedPosts, setBookmarkedPosts] = useState({});
   // Add state to track edited comments
   const [editedComments, setEditedComments] = useState({});
+  // Add state to track newly added comments
+  const [newlyAddedComments, setNewlyAddedComments] = useState({});
 
   useEffect(() => {
     fetchPosts();
+
+    // Add CSS for comment highlight animation
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .comment-highlight {
+        animation: highlightComment 3s ease;
+      }
+      
+      @keyframes highlightComment {
+        0% { background-color: rgba(255, 255, 0, 0.3); }
+        100% { background-color: transparent; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Clean up style on unmount
+    return () => {
+      document.head.removeChild(style);
+    };
   }, []);
 
   // Add useEffect to load user's bookmarks when component mounts
@@ -231,6 +252,21 @@ const Feed = () => {
         ...prev,
         [postId]: [...(prev[postId] || []), createdComment]
       }));
+      
+      // Mark comment as newly added
+      setNewlyAddedComments(prev => ({
+        ...prev,
+        [createdComment.id]: true
+      }));
+      
+      // Remove the highlight after 3 seconds
+      setTimeout(() => {
+        setNewlyAddedComments(prev => {
+          const updated = {...prev};
+          delete updated[createdComment.id];
+          return updated;
+        });
+      }, 3000);
       
       // Clear the comment input
       setNewComment(prev => ({
@@ -765,7 +801,10 @@ const Feed = () => {
                   {comments[post.id] && comments[post.id].length > 0 && (
                     <div className="mb-3">
                       {comments[post.id].map(comment => (
-                        <div key={comment.id} className="d-flex mb-2">
+                        <div 
+                          key={comment.id} 
+                          className={`d-flex mb-2 ${newlyAddedComments[comment.id] ? 'comment-highlight' : ''}`}
+                        >
                           <FaUserCircle size={30} className="text-secondary me-2 mt-1" />
                           <div className="bg-light p-2 rounded flex-grow-1">
                             <div className="d-flex justify-content-between">
