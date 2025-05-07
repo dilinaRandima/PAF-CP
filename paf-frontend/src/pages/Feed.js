@@ -237,9 +237,13 @@ const Feed = () => {
         ...prev,
         [postId]: ''
       }));
+      
+      // Add toast notification
+      toast.success('Comment posted successfully!');
+      
     } catch (err) {
       console.error('Error creating comment:', err);
-      alert('Failed to post comment. Please try again.');
+      toast.error('Failed to post comment. Please try again.');
     } finally {
       setSubmittingComment(false);
     }
