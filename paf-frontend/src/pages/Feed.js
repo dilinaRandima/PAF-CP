@@ -862,12 +862,13 @@ const Feed = () => {
                   {/* Add Comment Form */}
                   <div className="d-flex">
                     <FaUserCircle size={30} className="text-secondary me-2 mt-1" />
-                    <Form className="flex-grow-1 d-flex">
+                    <Form className="flex-grow-1 d-flex flex-column">
                       <Form.Control
                         type="text"
                         placeholder="Write a comment..."
                         value={newComment[post.id] || ''}
-                        onChange={(e) => handleNewCommentChange(post.id, e.target.value)}
+                        onChange={(e) => handleNewCommentChange(post.id, e.target.value.slice(0, 250))}
+                        maxLength={250}
                         onKeyPress={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
@@ -875,9 +876,14 @@ const Feed = () => {
                           }
                         }}
                       />
+                      {newComment[post.id] && (
+                        <small className="text-muted mt-1">
+                          {250 - (newComment[post.id]?.length || 0)} characters remaining
+                        </small>
+                      )}
                       <Button
                         variant="primary"
-                        className="ms-2"
+                        className="mt-2 align-self-end"
                         disabled={submittingComment || !newComment[post.id]}
                         onClick={() => handleNewCommentSubmit(post.id)}
                       >
