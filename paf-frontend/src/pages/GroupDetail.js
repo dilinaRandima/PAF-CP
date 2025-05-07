@@ -30,7 +30,16 @@ const GroupDetail = () => {
   const [submitting, setSubmitting] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   
-  // Add this helper function at the beginning of the component
+  // Loading state for different actions
+  const [actionLoading, setActionLoading] = useState({
+    join: false,
+    leave: false,
+    delete: false,
+    post: false,
+    removeUser: null // Store user ID being removed
+  });
+  
+  // Helper function to handle API errors
   const handleApiError = (error, message = 'An error occurred') => {
     console.error(`${message}:`, error);
     
@@ -90,7 +99,7 @@ const GroupDetail = () => {
     }
   };
 
-  // Updated optimized fetchUsers function
+  // Fetch users function
   const fetchUsers = async (userIds) => {
     // Filter out IDs we already have and null/undefined values
     const missingUserIds = userIds.filter(id => id && !users[id]);
@@ -139,6 +148,8 @@ const GroupDetail = () => {
     if (!group) return;
     
     try {
+      setActionLoading(prev => ({ ...prev, join: true }));
+      
       const updatedMembers = [...group.memberIds, currentUser.id];
       await groupService.updateGroupMembers(groupId, updatedMembers);
       
@@ -147,19 +158,30 @@ const GroupDetail = () => {
         ...prev,
         memberIds: updatedMembers
       }));
+      
+      // Show success message
+      setError({
+        variant: 'success',
+        message: 'Successfully joined the group'
+      });
+      setTimeout(() => setError(null), 3000);
     } catch (err) {
       handleApiError(err, 'Failed to join group');
+    } finally {
+      setActionLoading(prev => ({ ...prev, join: false }));
     }
   };
 
   const handleLeaveGroup = async () => {
     if (!group || isCreator) return;
     
-    if (!window.confirm('Are you sure you want to leave this group? Y or N')) {
+    if (!window.confirm('Are you sure you want to leave this group?')) {
       return;
     }
     
     try {
+      setActionLoading(prev => ({ ...prev, leave: true }));
+      
       const updatedMembers = group.memberIds.filter(id => id !== currentUser.id);
       const updatedAdmins = group.adminIds.filter(id => id !== currentUser.id);
       
@@ -175,8 +197,17 @@ const GroupDetail = () => {
         memberIds: updatedMembers,
         adminIds: updatedAdmins
       }));
+      
+      // Show success message
+      setError({
+        variant: 'success',
+        message: 'Successfully left the group'
+      });
+      setTimeout(() => setError(null), 3000);
     } catch (err) {
       handleApiError(err, 'Failed to leave group');
+    } finally {
+      setActionLoading(prev => ({ ...prev, leave: false }));
     }
   };
 
@@ -184,6 +215,8 @@ const GroupDetail = () => {
     if (!isCreator || memberId === currentUser.id) return;
     
     try {
+      setActionLoading(prev => ({ ...prev, removeUser: memberId }));
+      
       // Remove from members
       const updatedMembers = group.memberIds.filter(id => id !== memberId);
       
@@ -212,21 +245,25 @@ const GroupDetail = () => {
       setTimeout(() => setError(null), 3000);
     } catch (err) {
       handleApiError(err, 'Failed to remove member');
+    } finally {
+      setActionLoading(prev => ({ ...prev, removeUser: null }));
     }
   };
 
   const handleDeleteGroup = async () => {
     if (!isCreator) return;
     
-    if (!window.confirm('Are you sure you want to delete this group')) {
+    if (!window.confirm('Are you sure you want to delete this group?')) {
       return;
     }
     
     try {
+      setActionLoading(prev => ({ ...prev, delete: true }));
       await groupService.deleteGroup(groupId);
       navigate('/groups');
     } catch (err) {
       handleApiError(err, 'Failed to delete group');
+      setActionLoading(prev => ({ ...prev, delete: false }));
     }
   };
 
@@ -244,7 +281,7 @@ const GroupDetail = () => {
     if (!newPost.content) return;
     
     try {
-      setSubmitting(true);
+      setActionLoading(prev => ({ ...prev, post: true }));
       
       const postData = {
         ...newPost,
@@ -269,7 +306,7 @@ const GroupDetail = () => {
     } catch (err) {
       handleApiError(err, 'Failed to create post');
     } finally {
-      setSubmitting(false);
+      setActionLoading(prev => ({ ...prev, post: false }));
     }
   };
 
@@ -279,6 +316,10 @@ const GroupDetail = () => {
     }
     
     try {
+      // Set loading state for this post
+      const loadingPostId = `post_${postId}`;
+      setActionLoading(prev => ({ ...prev, [loadingPostId]: true }));
+      
       await groupPostService.deletePost(postId);
       
       // Remove post from the list
@@ -292,6 +333,9 @@ const GroupDetail = () => {
       setTimeout(() => setError(null), 3000);
     } catch (err) {
       handleApiError(err, 'Failed to delete post');
+    } finally {
+      const loadingPostId = `post_${postId}`;
+      setActionLoading(prev => ({ ...prev, [loadingPostId]: false }));
     }
   };
 
@@ -317,7 +361,7 @@ const GroupDetail = () => {
 
   return (
     <Container className="py-4">
-      {/* Add this alert component at the top of the JSX return statement */}
+      {/* Alert component for error/success messages */}
       {error && (
         <Alert 
           variant={error.variant || "danger"} 
@@ -369,17 +413,50 @@ const GroupDetail = () => {
                 <Button 
                   variant="outline-danger" 
                   onClick={handleLeaveGroup}
-                  disabled={isCreator}
+                  disabled={isCreator || actionLoading.leave}
                   title={isCreator ? "Creators cannot leave their groups" : "Leave group"}
                 >
-                  <FaUserMinus className="me-2" /> Leave
+                  {actionLoading.leave ? (
+                    <>
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                        className="me-2"
+                      />
+                      Leaving...
+                    </>
+                  ) : (
+                    <>
+                      <FaUserMinus className="me-2" /> Leave
+                    </>
+                  )}
                 </Button>
               ) : (
                 <Button 
                   variant="outline-primary" 
                   onClick={handleJoinGroup}
+                  disabled={actionLoading.join}
                 >
-                  <FaUserPlus className="me-2" /> Join
+                  {actionLoading.join ? (
+                    <>
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                        className="me-2"
+                      />
+                      Joining...
+                    </>
+                  ) : (
+                    <>
+                      <FaUserPlus className="me-2" /> Join
+                    </>
+                  )}
                 </Button>
               )}
               
@@ -400,8 +477,28 @@ const GroupDetail = () => {
                       </Link>
                     </li>
                     <li>
-                      <button className="dropdown-item text-danger" onClick={handleDeleteGroup}>
-                        <FaTrash className="me-2" /> Delete Group
+                      <button 
+                        className="dropdown-item text-danger" 
+                        onClick={handleDeleteGroup}
+                        disabled={actionLoading.delete}
+                      >
+                        {actionLoading.delete ? (
+                          <>
+                            <Spinner
+                              as="span"
+                              animation="border"
+                              size="sm"
+                              role="status"
+                              aria-hidden="true"
+                              className="me-2"
+                            />
+                            Deleting...
+                          </>
+                        ) : (
+                          <>
+                            <FaTrash className="me-2" /> Delete Group
+                          </>
+                        )}
                       </button>
                     </li>
                   </ul>
@@ -485,9 +582,21 @@ const GroupDetail = () => {
                           <Button 
                             type="submit" 
                             variant="primary"
-                            disabled={submitting || !newPost.content}
+                            disabled={actionLoading.post || !newPost.content}
                           >
-                            {submitting ? 'Posting...' : 'Post'}
+                            {actionLoading.post ? (
+                              <>
+                                <Spinner
+                                  as="span"
+                                  animation="border"
+                                  size="sm"
+                                  role="status"
+                                  aria-hidden="true"
+                                  className="me-2"
+                                />
+                                Posting...
+                              </>
+                            ) : 'Post'}
                           </Button>
                         </div>
                       </Form>
@@ -504,51 +613,65 @@ const GroupDetail = () => {
                   </div>
                 ) : (
                   <div>
-                    {posts.map(post => (
-                      <Card key={post.id} className="mb-3">
-                        <Card.Body>
-                          <div className="d-flex justify-content-between mb-3">
-                            <div className="d-flex">
-                              <FaUserCircle size={40} className="text-secondary me-2" />
-                              <div>
-                                <h6 className="mb-0">{users[post.userId]?.username || 'Unknown User'}</h6>
-                                <small className="text-muted">
-                                  {new Date(post.timestamp).toLocaleString()}
-                                </small>
+                    {posts.map(post => {
+                      const postLoadingKey = `post_${post.id}`;
+                      return (
+                        <Card key={post.id} className="mb-3">
+                          <Card.Body>
+                            <div className="d-flex justify-content-between mb-3">
+                              <div className="d-flex">
+                                <FaUserCircle size={40} className="text-secondary me-2" />
+                                <div>
+                                  <h6 className="mb-0">{users[post.userId]?.username || 'Unknown User'}</h6>
+                                  <small className="text-muted">
+                                    {new Date(post.timestamp).toLocaleString()}
+                                  </small>
+                                </div>
                               </div>
+                              
+                              {(post.userId === currentUser.id || isAdmin || isCreator) && (
+                                <Button 
+                                  variant="link" 
+                                  className="text-danger p-0" 
+                                  onClick={() => handleDeletePost(post.id)}
+                                  disabled={actionLoading[postLoadingKey]}
+                                >
+                                  {actionLoading[postLoadingKey] ? (
+                                    <Spinner
+                                      as="span"
+                                      animation="border"
+                                      size="sm"
+                                      role="status"
+                                      aria-hidden="true"
+                                    />
+                                  ) : (
+                                    <FaTrash />
+                                  )}
+                                </Button>
+                              )}
                             </div>
                             
-                            {(post.userId === currentUser.id || isAdmin || isCreator) && (
-                              <Button 
-                                variant="link" 
-                                className="text-danger p-0" 
-                                onClick={() => handleDeletePost(post.id)}
-                              >
-                                <FaTrash />
-                              </Button>
+                            <p>{post.content}</p>
+                            
+                            {post.mediaUrl && post.mediaType?.startsWith('image') && (
+                              <img 
+                                src={post.mediaUrl} 
+                                alt="Post media" 
+                                className="img-fluid rounded mb-3" 
+                              />
                             )}
-                          </div>
-                          
-                          <p>{post.content}</p>
-                          
-                          {post.mediaUrl && post.mediaType?.startsWith('image') && (
-                            <img 
-                              src={post.mediaUrl} 
-                              alt="Post media" 
-                              className="img-fluid rounded mb-3" 
-                            />
-                          )}
-                          
-                          {post.mediaUrl && post.mediaType?.startsWith('video') && (
-                            <video 
-                              src={post.mediaUrl} 
-                              controls 
-                              className="w-100 rounded mb-3" 
-                            />
-                          )}
-                        </Card.Body>
-                      </Card>
-                    ))}
+                            
+                            {post.mediaUrl && post.mediaType?.startsWith('video') && (
+                              <video 
+                                src={post.mediaUrl} 
+                                controls 
+                                className="w-100 rounded mb-3" 
+                              />
+                            )}
+                          </Card.Body>
+                        </Card>
+                      );
+                    })}
                   </div>
                 )}
               </Tab.Pane>
@@ -667,8 +790,21 @@ const GroupDetail = () => {
                             handleRemoveMember(memberId);
                           }
                         }}
+                        disabled={actionLoading.removeUser === memberId}
                       >
-                        Remove
+                        {actionLoading.removeUser === memberId ? (
+                          <>
+                            <Spinner
+                              as="span"
+                              animation="border"
+                              size="sm"
+                              role="status"
+                              aria-hidden="true"
+                              className="me-2"
+                            />
+                            Removing...
+                          </>
+                        ) : 'Remove'}
                       </Button>
                     </div>
                   )}
