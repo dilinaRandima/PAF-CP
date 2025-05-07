@@ -9,6 +9,7 @@ import MediaUpload from '../components/MediaUpload';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+
 // Replace date-fns with a simple function
 const formatTimeAgo = (dateString) => {
   if (!dateString) return 'Recently';
@@ -28,6 +29,32 @@ const formatTimeAgo = (dateString) => {
   return `${years} year${years > 1 ? 's' : ''} ago`;
 };
 
+const LoadingSkeletons = () => {
+  return (
+      <>
+        {[1, 2, 3].map(i => (
+            <Card key={i} className="custom-card mb-4">
+              <Card.Header className="bg-white">
+                <div className="d-flex align-items-center">
+                  <div className="bg-secondary opacity-25 rounded-circle me-2" style={{width: 40, height: 40}}></div>
+                  <div className="flex-grow-1">
+                    <div className="bg-secondary opacity-25" style={{width: '60%', height: 16, borderRadius: 4}}></div>
+                    <div className="bg-secondary opacity-25 mt-1" style={{width: '30%', height: 12, borderRadius: 4}}></div>
+                  </div>
+                </div>
+              </Card.Header>
+              <Card.Body>
+                <div className="bg-secondary opacity-25 mb-3" style={{width: '40%', height: 24, borderRadius: 4}}></div>
+                <div className="bg-secondary opacity-25 mb-3" style={{width: '100%', height: 200, borderRadius: 4}}></div>
+                <div className="bg-secondary opacity-25 mb-2" style={{width: '100%', height: 16, borderRadius: 4}}></div>
+                <div className="bg-secondary opacity-25" style={{width: '80%', height: 16, borderRadius: 4}}></div>
+              </Card.Body>
+            </Card>
+        ))}
+      </>
+  );
+};
+
 const Feed = () => {
   const { currentUser } = useContext(AuthContext);
   const [posts, setPosts] = useState([]);
@@ -45,6 +72,8 @@ const Feed = () => {
   const [editingComment, setEditingComment] = useState({ id: null, text: '' });
   // Add state to track bookmarked posts
   const [bookmarkedPosts, setBookmarkedPosts] = useState({});
+  //ADD post search
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchPosts();
@@ -488,14 +517,26 @@ const Feed = () => {
 
   if (loading) {
     return (
-      <Container className="py-5 text-center">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-        <p className="mt-2">Loading posts...</p>
-      </Container>
+        <Container className="py-4">
+          <Row>
+            <Col lg={8} className="mx-auto">
+              <LoadingSkeletons />
+            </Col>
+          </Row>
+        </Container>
     );
   }
+
+  const getFilteredPosts = () => {
+    if (!searchTerm.trim()) return posts;
+
+    return posts.filter(post =>
+        post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.contentDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.cuisineType?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+
 
   if (error) {
     return (
@@ -630,11 +671,51 @@ const Feed = () => {
                     disabled={submittingPost || !newPost.title || !newPost.contentDescription}
                   >
                     {submittingPost ? 'Posting...' : 'Share Recipe'}
+
+                    {/* WITH THIS */}
+                    {submittingPost ? (
+                        <>
+                          <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-1" />
+                          Posting...
+                        </>
+                    ) : (
+                        'Share Recipe'
+                    )}
+
                   </Button>
                 </div>
               </Form>
             </Card.Body>
           </Card>
+
+          {/* ADD SEARCH INPUT HERE - right after the post creation card and before posts display */}
+          <div className="mb-4">
+            <Form.Control
+                type="text"
+                placeholder="Search recipes by title, description or cuisine..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+            />
+          </div>
+
+          {/* ADD THIS REFRESH BUTTON */}
+          <div className="d-flex justify-content-end mb-3">
+            <Button
+                variant="outline-primary"
+                onClick={fetchPosts}
+                disabled={loading}
+                className="refresh-btn"
+            >
+              {loading ? (
+                  <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+              ) : (
+                  <span>↻ Refresh Feed</span>
+              )}
+            </Button>
+          </div>
+
+
           {/* Posts Feed */}
           {posts.length === 0 ? (
             <div className="text-center py-5">
