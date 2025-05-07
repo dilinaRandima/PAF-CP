@@ -764,7 +764,7 @@ const GroupDetail = () => {
                                 }}
                                 disabled={isMakingAdmin}
                               >
-                                {isMakingAdmin ? 'Updating...' : 'Make Admin'}
+                                {isMakingAdmin ? 'Updating...' : 'Make'}
                               </Button>
                             )}
                             
