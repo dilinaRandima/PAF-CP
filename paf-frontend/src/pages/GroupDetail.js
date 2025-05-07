@@ -9,17 +9,18 @@ import {
   FaUserMinus, 
   FaTrash, 
   FaEdit, 
-  FaCog, 
-  FaInfoCircle, 
+  FaInfoCircle,
   FaEllipsisH,
   FaUserCircle
 } from 'react-icons/fa';
 
 const GroupDetail = () => {
+  // Get URL params and context
   const { groupId } = useParams();
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
   
+  // Main state
   const [group, setGroup] = useState(null);
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState({});
@@ -27,62 +28,36 @@ const GroupDetail = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('posts');
   const [newPost, setNewPost] = useState({ content: '', mediaUrl: '', mediaType: '' });
-  const [submitting, setSubmitting] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   
-  // Loading state for different actions
-  const [actionLoading, setActionLoading] = useState({
-    join: false,
-    leave: false,
-    delete: false,
-    post: false,
-    removeUser: null // Store user ID being removed
-  });
+  // Loading states
+  const [isActionLoading, setIsActionLoading] = useState({});
   
-  // Helper function to handle API errors
-  const handleApiError = (error, message = 'An error occurred') => {
-    console.error(`${message}:`, error);
-    
-    // Get a more user-friendly error message
-    let errorMessage = message;
-    if (error.response) {
-      // Server responded with an error
-      errorMessage = error.response.data?.message || `Error: ${error.response.status}`;
-    } else if (error.request) {
-      // Request made but no response
-      errorMessage = 'Network error. Please check your connection and try again.';
-    }
-    
-    setError(errorMessage);
-    
-    // Clear error after 5 seconds
-    setTimeout(() => setError(null), 5000);
-    
-    return errorMessage;
-  };
-  
-  // Check if current user is a member
+  // User role checks
   const isMember = group?.memberIds?.includes(currentUser.id);
-  // Check if current user is an admin
   const isAdmin = group?.adminIds?.includes(currentUser.id);
-  // Check if current user is the creator
   const isCreator = group?.creatorId === currentUser.id;
 
+  // Fetch data on component mount
   useEffect(() => {
     fetchGroupData();
   }, [groupId]);
 
+  // Main data fetching function
   const fetchGroupData = async () => {
     try {
       setLoading(true);
       setError(null);
       
+      // Get group data
       const groupResponse = await groupService.getGroupById(groupId);
       setGroup(groupResponse.data);
       
+      // Get posts
       const postsResponse = await groupPostService.getPostsByGroupId(groupId);
       setPosts(postsResponse.data);
       
+      // Get all user IDs we need to fetch
       const userIds = [
         groupResponse.data.creatorId,
         ...groupResponse.data.memberIds,
@@ -93,44 +68,63 @@ const GroupDetail = () => {
       await fetchUsers([...new Set(userIds)]);
       
     } catch (err) {
-      handleApiError(err, 'Failed to load group data');
+      handleError(err, 'Failed to load group data');
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch users function
-  const fetchUsers = async (userIds) => {
-    // Filter out IDs we already have and null/undefined values
-    const missingUserIds = userIds.filter(id => id && !users[id]);
+  // Error handling helper
+  const handleError = (error, defaultMessage = 'An error occurred') => {
+    console.error(`${defaultMessage}:`, error);
     
-    if (missingUserIds.length === 0) {
-      return; // No new users to fetch
+    let message = defaultMessage;
+    if (error.response?.data?.message) {
+      message = error.response.data.message;
+    } else if (error.request) {
+      message = 'Network error. Please check your connection.';
     }
     
+    setError({ variant: 'danger', message });
+    setTimeout(() => setError(null), 5000);
+  };
+
+  // Show success message helper
+  const showSuccess = (message) => {
+    setError({ variant: 'success', message });
+    setTimeout(() => setError(null), 3000);
+  };
+
+  // Set loading state for an action
+  const setActionLoading = (action, isLoading) => {
+    setIsActionLoading(prev => ({ ...prev, [action]: isLoading }));
+  };
+
+  // Fetch users helper
+  const fetchUsers = async (userIds) => {
+    const missingUserIds = userIds.filter(id => id && !users[id]);
+    
+    if (missingUserIds.length === 0) return;
+    
     try {
-      // Fetch in batches of 20 to avoid large requests
       const batchSize = 20;
       let newUsers = { ...users };
       
       for (let i = 0; i < missingUserIds.length; i += batchSize) {
-        const batchIds = missingUserIds.slice(i, i + batchSize);
+        const batch = missingUserIds.slice(i, i + batchSize);
         
-        // If batch API is implemented
         try {
-          const response = await userService.getUsersByIds(batchIds);
-          // Response format should be: { data: { userId1: userData1, userId2: userData2, ... } }
+          // Try batch API first
+          const response = await userService.getUsersByIds(batch);
           Object.assign(newUsers, response.data);
         } catch (err) {
-          // Fall back to individual requests if batch API fails or isn't implemented
-          console.warn('Batch user fetch failed, falling back to individual requests');
+          // Fall back to individual requests
           await Promise.all(
-            batchIds.map(async (userId) => {
+            batch.map(async (userId) => {
               try {
                 const response = await userService.getUserById(userId);
                 newUsers[userId] = response.data;
               } catch (err) {
-                console.error(`Error fetching user ${userId}:`, err);
                 newUsers[userId] = { username: 'Unknown User' };
               }
             })
@@ -140,47 +134,37 @@ const GroupDetail = () => {
       
       setUsers(newUsers);
     } catch (err) {
-      handleApiError(err, 'Error fetching user data');
+      handleError(err, 'Error fetching user data');
     }
   };
 
+  // Join group handler
   const handleJoinGroup = async () => {
     if (!group) return;
     
     try {
-      setActionLoading(prev => ({ ...prev, join: true }));
+      setActionLoading('join', true);
       
       const updatedMembers = [...group.memberIds, currentUser.id];
       await groupService.updateGroupMembers(groupId, updatedMembers);
       
-      // Update local state
-      setGroup(prev => ({
-        ...prev,
-        memberIds: updatedMembers
-      }));
-      
-      // Show success message
-      setError({
-        variant: 'success',
-        message: 'Successfully joined the group'
-      });
-      setTimeout(() => setError(null), 3000);
+      setGroup(prev => ({ ...prev, memberIds: updatedMembers }));
+      showSuccess('Successfully joined the group');
     } catch (err) {
-      handleApiError(err, 'Failed to join group');
+      handleError(err, 'Failed to join group');
     } finally {
-      setActionLoading(prev => ({ ...prev, join: false }));
+      setActionLoading('join', false);
     }
   };
 
+  // Leave group handler
   const handleLeaveGroup = async () => {
     if (!group || isCreator) return;
     
-    if (!window.confirm('Are you sure you want to leave this group?')) {
-      return;
-    }
+    if (!window.confirm('Are you sure you want to leave this group?')) return;
     
     try {
-      setActionLoading(prev => ({ ...prev, leave: true }));
+      setActionLoading('leave', true);
       
       const updatedMembers = group.memberIds.filter(id => id !== currentUser.id);
       const updatedAdmins = group.adminIds.filter(id => id !== currentUser.id);
@@ -191,97 +175,111 @@ const GroupDetail = () => {
         await groupService.updateGroupAdmins(groupId, updatedAdmins);
       }
       
-      // Update local state
       setGroup(prev => ({
         ...prev,
         memberIds: updatedMembers,
         adminIds: updatedAdmins
       }));
       
-      // Show success message
-      setError({
-        variant: 'success',
-        message: 'Successfully left the group'
-      });
-      setTimeout(() => setError(null), 3000);
+      showSuccess('Successfully left the group');
     } catch (err) {
-      handleApiError(err, 'Failed to leave group');
+      handleError(err, 'Failed to leave group');
     } finally {
-      setActionLoading(prev => ({ ...prev, leave: false }));
+      setActionLoading('leave', false);
     }
   };
 
+  // Remove member handler
   const handleRemoveMember = async (memberId) => {
     if (!isCreator || memberId === currentUser.id) return;
     
     try {
-      setActionLoading(prev => ({ ...prev, removeUser: memberId }));
+      setActionLoading(`remove_${memberId}`, true);
       
-      // Remove from members
       const updatedMembers = group.memberIds.filter(id => id !== memberId);
-      
-      // Also remove from admins if they are an admin
       const updatedAdmins = group.adminIds.filter(id => id !== memberId);
       
-      // Update the group
       await groupService.updateGroupMembers(groupId, updatedMembers);
       
       if (group.adminIds.includes(memberId)) {
         await groupService.updateGroupAdmins(groupId, updatedAdmins);
       }
       
-      // Update local state
       setGroup(prev => ({
         ...prev,
         memberIds: updatedMembers,
         adminIds: updatedAdmins
       }));
       
-      // Show success message
-      setError({
-        variant: 'success',
-        message: 'Member removed successfully'
-      });
-      setTimeout(() => setError(null), 3000);
+      showSuccess('Member removed successfully');
     } catch (err) {
-      handleApiError(err, 'Failed to remove member');
+      handleError(err, 'Failed to remove member');
     } finally {
-      setActionLoading(prev => ({ ...prev, removeUser: null }));
+      setActionLoading(`remove_${memberId}`, false);
     }
   };
 
+  // Toggle admin status handler
+  const handleToggleAdmin = async (memberId, makeAdmin) => {
+    if (!isCreator || memberId === currentUser.id) return;
+    
+    const actionName = makeAdmin ? 'make_admin' : 'remove_admin';
+    
+    try {
+      setActionLoading(`${actionName}_${memberId}`, true);
+      
+      let updatedAdmins;
+      if (makeAdmin) {
+        updatedAdmins = [...group.adminIds, memberId];
+      } else {
+        updatedAdmins = group.adminIds.filter(id => id !== memberId);
+      }
+      
+      await groupService.updateGroupAdmins(groupId, updatedAdmins);
+      
+      setGroup(prev => ({
+        ...prev,
+        adminIds: updatedAdmins
+      }));
+      
+      showSuccess(makeAdmin ? 'Admin added successfully' : 'Admin removed successfully');
+    } catch (err) {
+      handleError(err, makeAdmin ? 'Failed to add admin' : 'Failed to remove admin');
+    } finally {
+      setActionLoading(`${actionName}_${memberId}`, false);
+    }
+  };
+
+  // Delete group handler
   const handleDeleteGroup = async () => {
     if (!isCreator) return;
     
-    if (!window.confirm('Are you sure you want to delete this group?')) {
-      return;
-    }
+    if (!window.confirm('Are you sure you want to delete this group?')) return;
     
     try {
-      setActionLoading(prev => ({ ...prev, delete: true }));
+      setActionLoading('delete', true);
       await groupService.deleteGroup(groupId);
       navigate('/groups');
     } catch (err) {
-      handleApiError(err, 'Failed to delete group');
-      setActionLoading(prev => ({ ...prev, delete: false }));
+      handleError(err, 'Failed to delete group');
+      setActionLoading('delete', false);
     }
   };
 
-  const handleNewPostChange = (e) => {
+  // New post form change handler
+  const handlePostInputChange = (e) => {
     const { name, value } = e.target;
-    setNewPost(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setNewPost(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleNewPostSubmit = async (e) => {
+  // Submit new post handler
+  const handleSubmitPost = async (e) => {
     e.preventDefault();
     
     if (!newPost.content) return;
     
     try {
-      setActionLoading(prev => ({ ...prev, post: true }));
+      setActionLoading('post', true);
       
       const postData = {
         ...newPost,
@@ -291,54 +289,36 @@ const GroupDetail = () => {
       
       const response = await groupPostService.createPost(postData);
       
-      // Add new post to the list
       setPosts(prev => [response.data, ...prev]);
-      
-      // Clear the form
       setNewPost({ content: '', mediaUrl: '', mediaType: '' });
       
-      // Show success message
-      setError({
-        variant: 'success',
-        message: 'Post created successfully'
-      });
-      setTimeout(() => setError(null), 3000);
+      showSuccess('Post created successfully');
     } catch (err) {
-      handleApiError(err, 'Failed to create post');
+      handleError(err, 'Failed to create post');
     } finally {
-      setActionLoading(prev => ({ ...prev, post: false }));
+      setActionLoading('post', false);
     }
   };
 
+  // Delete post handler
   const handleDeletePost = async (postId) => {
-    if (!window.confirm('Are you sure you want to delete this post?')) {
-      return;
-    }
+    if (!window.confirm('Are you sure you want to delete this post?')) return;
     
     try {
-      // Set loading state for this post
-      const loadingPostId = `post_${postId}`;
-      setActionLoading(prev => ({ ...prev, [loadingPostId]: true }));
+      setActionLoading(`delete_post_${postId}`, true);
       
       await groupPostService.deletePost(postId);
-      
-      // Remove post from the list
       setPosts(prev => prev.filter(post => post.id !== postId));
       
-      // Show success message
-      setError({
-        variant: 'success',
-        message: 'Post deleted successfully'
-      });
-      setTimeout(() => setError(null), 3000);
+      showSuccess('Post deleted successfully');
     } catch (err) {
-      handleApiError(err, 'Failed to delete post');
+      handleError(err, 'Failed to delete post');
     } finally {
-      const loadingPostId = `post_${postId}`;
-      setActionLoading(prev => ({ ...prev, [loadingPostId]: false }));
+      setActionLoading(`delete_post_${postId}`, false);
     }
   };
 
+  // Loading state component
   if (loading) {
     return (
       <Container className="py-5 text-center">
@@ -350,6 +330,7 @@ const GroupDetail = () => {
     );
   }
 
+  // Group not found state
   if (!group) {
     return (
       <Container className="py-5">
@@ -361,7 +342,7 @@ const GroupDetail = () => {
 
   return (
     <Container className="py-4">
-      {/* Alert component for error/success messages */}
+      {/* Error/Success Message */}
       {error && (
         <Alert 
           variant={error.variant || "danger"} 
@@ -373,8 +354,8 @@ const GroupDetail = () => {
         </Alert>
       )}
       
-      {/* Group Header */}
-      <Card className="custom-card mb-4">
+      {/* Group Header Card */}
+      <Card className="mb-4">
         {group.imageUrl && (
           <div className="position-relative">
             <img 
@@ -397,80 +378,55 @@ const GroupDetail = () => {
               <p className="text-muted">
                 Created by {users[group.creatorId]?.username || 'Unknown User'} • {group.memberIds?.length || 0} members
               </p>
-              {group.tags && group.tags.length > 0 && (
+              {group.tags?.length > 0 && (
                 <div className="mb-3">
                   {group.tags.map((tag, index) => (
-                    <Badge bg="secondary" className="me-1 mb-1" key={index}>
-                      {tag}
-                    </Badge>
+                    <Badge bg="secondary" className="me-1 mb-1" key={index}>{tag}</Badge>
                   ))}
                 </div>
               )}
             </div>
             
             <div>
+              {/* Join/Leave Button */}
               {isMember ? (
                 <Button 
                   variant="outline-danger" 
                   onClick={handleLeaveGroup}
-                  disabled={isCreator || actionLoading.leave}
+                  disabled={isCreator || isActionLoading.leave}
                   title={isCreator ? "Creators cannot leave their groups" : "Leave group"}
                 >
-                  {actionLoading.leave ? (
-                    <>
-                      <Spinner
-                        as="span"
-                        animation="border"
-                        size="sm"
-                        role="status"
-                        aria-hidden="true"
-                        className="me-2"
-                      />
-                      Leaving...
-                    </>
+                  {isActionLoading.leave ? (
+                    <><Spinner as="span" animation="border" size="sm" className="me-2" /> Leaving...</>
                   ) : (
-                    <>
-                      <FaUserMinus className="me-2" /> Leave
-                    </>
+                    <><FaUserMinus className="me-2" /> Leave</>
                   )}
                 </Button>
               ) : (
                 <Button 
                   variant="outline-primary" 
                   onClick={handleJoinGroup}
-                  disabled={actionLoading.join}
+                  disabled={isActionLoading.join}
                 >
-                  {actionLoading.join ? (
-                    <>
-                      <Spinner
-                        as="span"
-                        animation="border"
-                        size="sm"
-                        role="status"
-                        aria-hidden="true"
-                        className="me-2"
-                      />
-                      Joining...
-                    </>
+                  {isActionLoading.join ? (
+                    <><Spinner as="span" animation="border" size="sm" className="me-2" /> Joining...</>
                   ) : (
-                    <>
-                      <FaUserPlus className="me-2" /> Join
-                    </>
+                    <><FaUserPlus className="me-2" /> Join</>
                   )}
                 </Button>
               )}
               
+              {/* Group Admin Actions */}
               {isCreator && (
                 <div className="dropdown d-inline-block ms-2">
                   <Button 
                     variant="outline-secondary" 
                     id="group-actions-dropdown"
                     data-bs-toggle="dropdown" 
-                    aria-expanded="false"
                   >
                     <FaEllipsisH />
                   </Button>
-                  <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="group-actions-dropdown">
+                  <ul className="dropdown-menu dropdown-menu-end">
                     <li>
                       <Link to={`/edit-group/${groupId}`} className="dropdown-item">
                         <FaEdit className="me-2" /> Edit Group
@@ -480,24 +436,12 @@ const GroupDetail = () => {
                       <button 
                         className="dropdown-item text-danger" 
                         onClick={handleDeleteGroup}
-                        disabled={actionLoading.delete}
+                        disabled={isActionLoading.delete}
                       >
-                        {actionLoading.delete ? (
-                          <>
-                            <Spinner
-                              as="span"
-                              animation="border"
-                              size="sm"
-                              role="status"
-                              aria-hidden="true"
-                              className="me-2"
-                            />
-                            Deleting...
-                          </>
+                        {isActionLoading.delete ? (
+                          <><Spinner as="span" animation="border" size="sm" className="me-2" /> Deleting...</>
                         ) : (
-                          <>
-                            <FaTrash className="me-2" /> Delete Group
-                          </>
+                          <><FaTrash className="me-2" /> Delete Group</>
                         )}
                       </button>
                     </li>
@@ -507,26 +451,19 @@ const GroupDetail = () => {
             </div>
           </div>
           
-          {group.description && (
-            <p className="mb-4">{group.description}</p>
-          )}
+          {/* Group Description */}
+          {group.description && <p className="mb-0">{group.description}</p>}
         </Card.Body>
       </Card>
 
-      {/* Group Content */}
+      {/* Group Content Tabs */}
       <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
-        <Card className="custom-card">
+        <Card>
           <Card.Header>
             <Nav variant="tabs">
-              <Nav.Item>
-                <Nav.Link eventKey="posts">Posts</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="members">Members</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="about">About</Nav.Link>
-              </Nav.Item>
+              <Nav.Item><Nav.Link eventKey="posts">Posts</Nav.Link></Nav.Item>
+              <Nav.Item><Nav.Link eventKey="members">Members</Nav.Link></Nav.Item>
+              <Nav.Item><Nav.Link eventKey="about">About</Nav.Link></Nav.Item>
             </Nav>
           </Card.Header>
           
@@ -534,11 +471,12 @@ const GroupDetail = () => {
             <Tab.Content>
               {/* Posts Tab */}
               <Tab.Pane eventKey="posts">
+                {/* New Post Form for Members */}
                 {isMember && (
                   <Card className="mb-4">
                     <Card.Body>
                       <h5 className="mb-3">Create a Post</h5>
-                      <Form onSubmit={handleNewPostSubmit}>
+                      <Form onSubmit={handleSubmitPost}>
                         <Form.Group className="mb-3">
                           <Form.Control
                             as="textarea"
@@ -546,7 +484,7 @@ const GroupDetail = () => {
                             placeholder="Share something with the group..."
                             name="content"
                             value={newPost.content}
-                            onChange={handleNewPostChange}
+                            onChange={handlePostInputChange}
                             required
                           />
                         </Form.Group>
@@ -559,7 +497,7 @@ const GroupDetail = () => {
                                 placeholder="Media URL (optional)"
                                 name="mediaUrl"
                                 value={newPost.mediaUrl}
-                                onChange={handleNewPostChange}
+                                onChange={handlePostInputChange}
                               />
                             </Form.Group>
                           </Col>
@@ -568,7 +506,7 @@ const GroupDetail = () => {
                               <Form.Select
                                 name="mediaType"
                                 value={newPost.mediaType}
-                                onChange={handleNewPostChange}
+                                onChange={handlePostInputChange}
                               >
                                 <option value="">Media type...</option>
                                 <option value="image/jpeg">Image</option>
@@ -582,20 +520,10 @@ const GroupDetail = () => {
                           <Button 
                             type="submit" 
                             variant="primary"
-                            disabled={actionLoading.post || !newPost.content}
+                            disabled={isActionLoading.post || !newPost.content}
                           >
-                            {actionLoading.post ? (
-                              <>
-                                <Spinner
-                                  as="span"
-                                  animation="border"
-                                  size="sm"
-                                  role="status"
-                                  aria-hidden="true"
-                                  className="me-2"
-                                />
-                                Posting...
-                              </>
+                            {isActionLoading.post ? (
+                              <><Spinner as="span" animation="border" size="sm" className="me-2" /> Posting...</>
                             ) : 'Post'}
                           </Button>
                         </div>
@@ -604,20 +532,20 @@ const GroupDetail = () => {
                   </Card>
                 )}
                 
+                {/* Post List */}
                 {posts.length === 0 ? (
                   <div className="text-center py-5">
                     <p className="text-muted">No posts in this group yet</p>
-                    {isMember && (
-                      <p>Be the first to share something!</p>
-                    )}
+                    {isMember && <p>Be the first to share something!</p>}
                   </div>
                 ) : (
                   <div>
                     {posts.map(post => {
-                      const postLoadingKey = `post_${post.id}`;
+                      const isPostDeleting = isActionLoading[`delete_post_${post.id}`];
                       return (
                         <Card key={post.id} className="mb-3">
                           <Card.Body>
+                            {/* Post Header */}
                             <div className="d-flex justify-content-between mb-3">
                               <div className="d-flex">
                                 <FaUserCircle size={40} className="text-secondary me-2" />
@@ -629,21 +557,16 @@ const GroupDetail = () => {
                                 </div>
                               </div>
                               
+                              {/* Delete Post Button */}
                               {(post.userId === currentUser.id || isAdmin || isCreator) && (
                                 <Button 
                                   variant="link" 
                                   className="text-danger p-0" 
                                   onClick={() => handleDeletePost(post.id)}
-                                  disabled={actionLoading[postLoadingKey]}
+                                  disabled={isPostDeleting}
                                 >
-                                  {actionLoading[postLoadingKey] ? (
-                                    <Spinner
-                                      as="span"
-                                      animation="border"
-                                      size="sm"
-                                      role="status"
-                                      aria-hidden="true"
-                                    />
+                                  {isPostDeleting ? (
+                                    <Spinner as="span" animation="border" size="sm" />
                                   ) : (
                                     <FaTrash />
                                   )}
@@ -651,8 +574,10 @@ const GroupDetail = () => {
                               )}
                             </div>
                             
+                            {/* Post Content */}
                             <p>{post.content}</p>
                             
+                            {/* Post Media */}
                             {post.mediaUrl && post.mediaType?.startsWith('image') && (
                               <img 
                                 src={post.mediaUrl} 
@@ -678,41 +603,52 @@ const GroupDetail = () => {
               
               {/* Members Tab */}
               <Tab.Pane eventKey="members">
-                <div className="d-flex justify-content-between mb-4">
-                  <h4>Members ({group.memberIds?.length || 0})</h4>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <h4 className="mb-0">Members ({group.memberIds?.length || 0})</h4>
                   <Button 
                     variant="outline-primary" 
-                    size="sm"
                     onClick={() => setShowMembersModal(true)}
                   >
-                    <FaUsers className="me-2" /> View All
+                    <FaUsers className="me-2" /> View All Members
                   </Button>
                 </div>
                 
-                <Row>
-                  {group.memberIds?.slice(0, 8).map(memberId => (
-                    <Col md={3} sm={6} className="mb-4" key={memberId}>
-                      <Card className="text-center p-3">
-                        <FaUserCircle size={60} className="mx-auto text-secondary mb-2" />
-                        <h6>{users[memberId]?.username || 'Unknown User'}</h6>
-                        {memberId === group.creatorId && (
-                          <Badge bg="primary" className="mx-auto">Creator</Badge>
-                        )}
-                        {group.adminIds?.includes(memberId) && memberId !== group.creatorId && (
-                          <Badge bg="info" className="mx-auto">Admin</Badge>
-                        )}
-                      </Card>
+                <Row className="g-3">
+                  {group.memberIds?.length === 0 ? (
+                    <Col xs={12}>
+                      <div className="text-center py-4">
+                        <p className="text-muted">This group has no members yet.</p>
+                      </div>
                     </Col>
-                  ))}
+                  ) : (
+                    group.memberIds?.slice(0, 8).map(memberId => (
+                      <Col lg={3} md={4} sm={6} xs={12} key={memberId}>
+                        <Card className="h-100 text-center p-3">
+                          <FaUserCircle size={50} className="mx-auto text-secondary mb-2" />
+                          <h6 className="text-truncate" style={{ maxWidth: '90%', margin: '0 auto' }}>
+                            {users[memberId]?.username || 'Unknown User'}
+                          </h6>
+                          <div className="mt-2">
+                            {memberId === group.creatorId && (
+                              <Badge bg="primary" className="mx-auto">Creator</Badge>
+                            )}
+                            {group.adminIds?.includes(memberId) && memberId !== group.creatorId && (
+                              <Badge bg="info" className="mx-auto">Admin</Badge>
+                            )}
+                          </div>
+                        </Card>
+                      </Col>
+                    ))
+                  )}
                 </Row>
                 
                 {group.memberIds?.length > 8 && (
-                  <div className="text-center mt-3">
+                  <div className="text-center mt-4">
                     <Button 
                       variant="outline-secondary"
                       onClick={() => setShowMembersModal(true)}
                     >
-                      View All Members
+                      View All {group.memberIds.length} Members
                     </Button>
                   </div>
                 )}
@@ -725,8 +661,7 @@ const GroupDetail = () => {
                   <ul className="list-group mb-4">
                     {group.rules.map((rule, index) => (
                       <li key={index} className="list-group-item">
-                        <FaInfoCircle className="text-primary me-2" />
-                        {rule}
+                        <FaInfoCircle className="text-primary me-2" />{rule}
                       </li>
                     ))}
                   </ul>
@@ -760,59 +695,106 @@ const GroupDetail = () => {
         show={showMembersModal} 
         onHide={() => setShowMembersModal(false)}
         size="lg"
+        centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Group Members</Modal.Title>
+          <Modal.Title>
+            Group Members ({group.memberIds?.length || 0})
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <Row>
-            {group.memberIds?.map(memberId => (
-              <Col md={4} sm={6} className="mb-4" key={memberId}>
-                <Card className="text-center p-3">
-                  <FaUserCircle size={60} className="mx-auto text-secondary mb-2" />
-                  <h6>{users[memberId]?.username || 'Unknown User'}</h6>
-                  <div>
-                    {memberId === group.creatorId && (
-                      <Badge bg="primary" className="mx-1">Creator</Badge>
-                    )}
-                    {group.adminIds?.includes(memberId) && memberId !== group.creatorId && (
-                      <Badge bg="info" className="mx-1">Admin</Badge>
-                    )}
-                  </div>
-                  
-                  {isCreator && memberId !== currentUser.id && (
-                    <div className="mt-2">
-                      <Button 
-                        variant="outline-danger" 
-                        size="sm"
-                        onClick={() => {
-                          if (window.confirm(`Remove ${users[memberId]?.username || 'this user'} from the group?`)) {
-                            handleRemoveMember(memberId);
-                          }
-                        }}
-                        disabled={actionLoading.removeUser === memberId}
-                      >
-                        {actionLoading.removeUser === memberId ? (
-                          <>
-                            <Spinner
-                              as="span"
-                              animation="border"
+        <Modal.Body className="py-4">
+          {group.memberIds?.length === 0 ? (
+            <div className="text-center py-4">
+              <p className="text-muted">This group has no members yet.</p>
+            </div>
+          ) : (
+            <Row className="g-3">
+              {group.memberIds?.map(memberId => {
+                const isRemoving = isActionLoading[`remove_${memberId}`];
+                const isMakingAdmin = isActionLoading[`make_admin_${memberId}`];
+                const isRemovingAdmin = isActionLoading[`remove_admin_${memberId}`];
+                
+                return (
+                  <Col lg={4} md={6} sm={12} key={memberId}>
+                    <Card className="h-100">
+                      <Card.Body className="d-flex flex-column align-items-center p-3">
+                        <div className="d-flex align-items-center w-100 mb-2">
+                          <FaUserCircle size={50} className="text-secondary me-3" />
+                          <div className="flex-grow-1">
+                            <h6 className="mb-0 text-truncate" style={{ maxWidth: '150px' }}>
+                              {users[memberId]?.username || 'Unknown User'}
+                            </h6>
+                            <div className="mt-1">
+                              {memberId === group.creatorId && (
+                                <Badge bg="primary" className="me-1">Creator</Badge>
+                              )}
+                              {group.adminIds?.includes(memberId) && memberId !== group.creatorId && (
+                                <Badge bg="info" className="me-1">Admin</Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Admin Actions */}
+                        {isCreator && memberId !== currentUser.id && (
+                          <div className="mt-2 d-flex w-100 justify-content-end">
+                            {group.adminIds?.includes(memberId) && memberId !== group.creatorId ? (
+                              <Button 
+                                variant="outline-secondary" 
+                                size="sm"
+                                className="me-2"
+                                onClick={() => {
+                                  if (window.confirm(`Remove admin status from ${users[memberId]?.username || 'this user'}?`)) {
+                                    handleToggleAdmin(memberId, false);
+                                  }
+                                }}
+                                disabled={isRemovingAdmin}
+                              >
+                                {isRemovingAdmin ? 'Updating...' : 'Remove Admin'}
+                              </Button>
+                            ) : memberId !== group.creatorId && (
+                              <Button 
+                                variant="outline-primary" 
+                                size="sm"
+                                className="me-2"
+                                onClick={() => {
+                                  if (window.confirm(`Make ${users[memberId]?.username || 'this user'} an admin?`)) {
+                                    handleToggleAdmin(memberId, true);
+                                  }
+                                }}
+                                disabled={isMakingAdmin}
+                              >
+                                {isMakingAdmin ? 'Updating...' : 'Make Admin'}
+                              </Button>
+                            )}
+                            
+                            <Button 
+                              variant="outline-danger" 
                               size="sm"
-                              role="status"
-                              aria-hidden="true"
-                              className="me-2"
-                            />
-                            Removing...
-                          </>
-                        ) : 'Remove'}
-                      </Button>
-                    </div>
-                  )}
-                </Card>
-              </Col>
-            ))}
-          </Row>
+                              onClick={() => {
+                                if (window.confirm(`Remove ${users[memberId]?.username || 'this user'} from the group?`)) {
+                                  handleRemoveMember(memberId);
+                                }
+                              }}
+                              disabled={isRemoving}
+                            >
+                              {isRemoving ? 'Removing...' : 'Remove'}
+                            </Button>
+                          </div>
+                        )}
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                );
+              })}
+            </Row>
+          )}
         </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowMembersModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
       </Modal>
     </Container>
   );
