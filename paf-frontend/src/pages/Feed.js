@@ -699,6 +699,22 @@ const Feed = () => {
             />
           </div>
 
+          {/* ADD THIS REFRESH BUTTON */}
+          <div className="d-flex justify-content-end mb-3">
+            <Button
+                variant="outline-primary"
+                onClick={fetchPosts}
+                disabled={loading}
+                className="refresh-btn"
+            >
+              {loading ? (
+                  <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+              ) : (
+                  <span>↻ Refresh Feed</span>
+              )}
+            </Button>
+          </div>
+
 
           {/* Posts Feed */}
           {posts.length === 0 ? (
