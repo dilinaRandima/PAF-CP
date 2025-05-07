@@ -332,8 +332,10 @@ const Feed = () => {
           ...prev,
           [postId]: prev[postId].filter(like => like.id !== userLike.id)
         }));
+        toast.info('Post unliked');
       } catch (err) {
         console.error('Error removing like:', err);
+        toast.error('Failed to unlike the post. Please try again.');
       }
     } else {
       // User hasn't liked the post, so like it
@@ -349,8 +351,10 @@ const Feed = () => {
           ...prev,
           [postId]: [...(prev[postId] || []), createdLike]
         }));
+        toast.success('Post liked!');
       } catch (err) {
         console.error('Error adding like:', err);
+        toast.error('Failed to like the post. Please try again.');
       }
     }
   };
