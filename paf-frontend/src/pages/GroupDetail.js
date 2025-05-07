@@ -12,7 +12,7 @@ import {
   FaCog, 
   FaInfoCircle, 
   FaEllipsisH,
-  FaUserCircle  // Added this import
+  FaUserCircle
 } from 'react-icons/fa';
 
 const GroupDetail = () => {
@@ -29,6 +29,28 @@ const GroupDetail = () => {
   const [newPost, setNewPost] = useState({ content: '', mediaUrl: '', mediaType: '' });
   const [submitting, setSubmitting] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
+  
+  // Add this helper function at the beginning of the component
+  const handleApiError = (error, message = 'An error occurred') => {
+    console.error(`${message}:`, error);
+    
+    // Get a more user-friendly error message
+    let errorMessage = message;
+    if (error.response) {
+      // Server responded with an error
+      errorMessage = error.response.data?.message || `Error: ${error.response.status}`;
+    } else if (error.request) {
+      // Request made but no response
+      errorMessage = 'Network error. Please check your connection and try again.';
+    }
+    
+    setError(errorMessage);
+    
+    // Clear error after 5 seconds
+    setTimeout(() => setError(null), 5000);
+    
+    return errorMessage;
+  };
   
   // Check if current user is a member
   const isMember = group?.memberIds?.includes(currentUser.id);
@@ -62,8 +84,7 @@ const GroupDetail = () => {
       await fetchUsers([...new Set(userIds)]);
       
     } catch (err) {
-      console.error('Error:', err);
-      setError('Failed to load group data');
+      handleApiError(err, 'Failed to load group data');
     } finally {
       setLoading(false);
     }
@@ -100,8 +121,7 @@ const GroupDetail = () => {
         memberIds: updatedMembers
       }));
     } catch (err) {
-      console.error('Error', err);
-      alert('Failed to join group. Please try again.');
+      handleApiError(err, 'Failed to join group');
     }
   };
 
@@ -129,12 +149,10 @@ const GroupDetail = () => {
         adminIds: updatedAdmins
       }));
     } catch (err) {
-      console.error('Error leaving group:', err);
-      alert('Failed to leave group. Please try again.');
+      handleApiError(err, 'Failed to leave group');
     }
   };
 
-  // Add this function to the GroupDetail component
   const handleRemoveMember = async (memberId) => {
     if (!isCreator || memberId === currentUser.id) return;
     
@@ -160,10 +178,13 @@ const GroupDetail = () => {
       }));
       
       // Show success message
-      alert(`Member removed successfully`);
+      setError({
+        variant: 'success',
+        message: 'Member removed successfully'
+      });
+      setTimeout(() => setError(null), 3000);
     } catch (err) {
-      console.error('Error removing member:', err);
-      alert('Failed to remove member. Please try again.');
+      handleApiError(err, 'Failed to remove member');
     }
   };
 
@@ -178,8 +199,7 @@ const GroupDetail = () => {
       await groupService.deleteGroup(groupId);
       navigate('/groups');
     } catch (err) {
-      console.error('Error deleting group:', err);
-      alert('Failed to delete group. Please try again.');
+      handleApiError(err, 'Failed to delete group');
     }
   };
 
@@ -212,9 +232,15 @@ const GroupDetail = () => {
       
       // Clear the form
       setNewPost({ content: '', mediaUrl: '', mediaType: '' });
+      
+      // Show success message
+      setError({
+        variant: 'success',
+        message: 'Post created successfully'
+      });
+      setTimeout(() => setError(null), 3000);
     } catch (err) {
-      console.error('Error creating post:', err);
-      alert('Failed to create post');
+      handleApiError(err, 'Failed to create post');
     } finally {
       setSubmitting(false);
     }
@@ -230,9 +256,15 @@ const GroupDetail = () => {
       
       // Remove post from the list
       setPosts(prev => prev.filter(post => post.id !== postId));
+      
+      // Show success message
+      setError({
+        variant: 'success',
+        message: 'Post deleted successfully'
+      });
+      setTimeout(() => setError(null), 3000);
     } catch (err) {
-      console.error('Error deleting post:', err);
-      alert('Failed to delete post');
+      handleApiError(err, 'Failed to delete post');
     }
   };
 
@@ -243,15 +275,6 @@ const GroupDetail = () => {
           <span className="visually-hidden">Loading...</span>
         </Spinner>
         <p className="mt-2">Loading group data...</p>
-      </Container>
-    );
-  }
-
-  if (error) {
-    return (
-      <Container className="py-5">
-        <Alert variant="danger">{error}</Alert>
-        <Button onClick={fetchGroupData}>Try Again</Button>
       </Container>
     );
   }
@@ -267,6 +290,18 @@ const GroupDetail = () => {
 
   return (
     <Container className="py-4">
+      {/* Add this alert component at the top of the JSX return statement */}
+      {error && (
+        <Alert 
+          variant={error.variant || "danger"} 
+          dismissible 
+          onClose={() => setError(null)}
+          className="mb-4"
+        >
+          {error.message || error}
+        </Alert>
+      )}
+      
       {/* Group Header */}
       <Card className="custom-card mb-4">
         {group.imageUrl && (
