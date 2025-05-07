@@ -310,9 +310,13 @@ const Feed = () => {
       }));
       
       setEditingComment({ id: null, text: '' });
+      
+      // Add toast notification
+      toast.success('Comment updated successfully!');
+      
     } catch (err) {
       console.error('Error updating comment:', err);
-      alert('Failed to update comment. Please try again.');
+      toast.error('Failed to update comment. Please try again.');
     }
   };
 
