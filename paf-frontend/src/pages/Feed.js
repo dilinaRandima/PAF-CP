@@ -676,6 +676,19 @@ const Feed = () => {
               </Form>
             </Card.Body>
           </Card>
+
+          {/* ADD SEARCH INPUT HERE - right after the post creation card and before posts display */}
+          <div className="mb-4">
+            <Form.Control
+                type="text"
+                placeholder="Search recipes by title, description or cuisine..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+            />
+          </div>
+
+
           {/* Posts Feed */}
           {posts.length === 0 ? (
             <div className="text-center py-5">
