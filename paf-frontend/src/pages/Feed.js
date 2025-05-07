@@ -671,6 +671,17 @@ const Feed = () => {
                     disabled={submittingPost || !newPost.title || !newPost.contentDescription}
                   >
                     {submittingPost ? 'Posting...' : 'Share Recipe'}
+
+                    {/* WITH THIS */}
+                    {submittingPost ? (
+                        <>
+                          <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-1" />
+                          Posting...
+                        </>
+                    ) : (
+                        'Share Recipe'
+                    )}
+
                   </Button>
                 </div>
               </Form>
