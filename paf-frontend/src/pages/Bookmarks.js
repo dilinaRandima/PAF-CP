@@ -11,6 +11,8 @@ const Bookmarks = () => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortDirection, setSortDirection] = useState('desc');
   const [editingBookmark, setEditingBookmark] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
