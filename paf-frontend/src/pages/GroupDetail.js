@@ -90,22 +90,49 @@ const GroupDetail = () => {
     }
   };
 
+  // Updated optimized fetchUsers function
   const fetchUsers = async (userIds) => {
-    const usersObject = { ...users };
+    // Filter out IDs we already have and null/undefined values
+    const missingUserIds = userIds.filter(id => id && !users[id]);
     
-    for (const userId of userIds) {
-      if (!usersObject[userId] && userId) {
-        try {
-          const response = await userService.getUserById(userId);
-          usersObject[userId] = response.data;
-        } catch (err) {
-          console.error(`Error fetching user ${userId}:`, err);
-          usersObject[userId] = { username: 'Unknown User' };
-        }
-      }
+    if (missingUserIds.length === 0) {
+      return; // No new users to fetch
     }
     
-    setUsers(usersObject);
+    try {
+      // Fetch in batches of 20 to avoid large requests
+      const batchSize = 20;
+      let newUsers = { ...users };
+      
+      for (let i = 0; i < missingUserIds.length; i += batchSize) {
+        const batchIds = missingUserIds.slice(i, i + batchSize);
+        
+        // If batch API is implemented
+        try {
+          const response = await userService.getUsersByIds(batchIds);
+          // Response format should be: { data: { userId1: userData1, userId2: userData2, ... } }
+          Object.assign(newUsers, response.data);
+        } catch (err) {
+          // Fall back to individual requests if batch API fails or isn't implemented
+          console.warn('Batch user fetch failed, falling back to individual requests');
+          await Promise.all(
+            batchIds.map(async (userId) => {
+              try {
+                const response = await userService.getUserById(userId);
+                newUsers[userId] = response.data;
+              } catch (err) {
+                console.error(`Error fetching user ${userId}:`, err);
+                newUsers[userId] = { username: 'Unknown User' };
+              }
+            })
+          );
+        }
+      }
+      
+      setUsers(newUsers);
+    } catch (err) {
+      handleApiError(err, 'Error fetching user data');
+    }
   };
 
   const handleJoinGroup = async () => {
