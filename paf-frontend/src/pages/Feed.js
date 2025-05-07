@@ -262,9 +262,13 @@ const Feed = () => {
         ...prev,
         [postId]: prev[postId].filter(comment => comment.id !== commentId)
       }));
+      
+      // Add toast notification
+      toast.success('Comment deleted successfully!');
+      
     } catch (err) {
       console.error('Error deleting comment:', err);
-      alert('Failed to delete comment. Please try again.');
+      toast.error('Failed to delete comment. Please try again.');
     }
   };
 
