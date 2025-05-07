@@ -49,6 +49,9 @@ const Feed = () => {
   const [editedComments, setEditedComments] = useState({});
   // Add state to track newly added comments
   const [newlyAddedComments, setNewlyAddedComments] = useState({});
+  // Add state to track last viewed comment counts
+  const [lastViewedCommentCounts, setLastViewedCommentCounts] = useState({});
+  const [unreadCommentCounts, setUnreadCommentCounts] = useState({});
 
   useEffect(() => {
     fetchPosts();
@@ -164,6 +167,26 @@ const Feed = () => {
     setUsers(usersObject);
   };
 
+  // Function to handle post view and track comment counts
+  const handlePostView = (postId) => {
+    const currentCommentCount = (comments[postId] || []).length;
+    
+    // Update unread count
+    const lastCount = lastViewedCommentCounts[postId] || 0;
+    const unreadCount = Math.max(0, currentCommentCount - lastCount);
+    
+    setUnreadCommentCounts(prev => ({
+      ...prev,
+      [postId]: unreadCount
+    }));
+    
+    // Update last viewed count
+    setLastViewedCommentCounts(prev => ({
+      ...prev,
+      [postId]: currentCommentCount
+    }));
+  };
+
   const handleNewPostChange = (e) => {
     const { name, value } = e.target;
     setNewPost(prev => ({
@@ -276,6 +299,15 @@ const Feed = () => {
       
       // Add toast notification
       toast.success('Comment posted successfully!');
+      
+      // Update unread comment counts for other users
+      const updatedCount = (comments[postId] || []).length + 1;
+      if (lastViewedCommentCounts[postId] !== undefined) {
+        setUnreadCommentCounts(prev => ({
+          ...prev,
+          [postId]: Math.max(0, updatedCount - lastViewedCommentCounts[postId])
+        }));
+      }
       
     } catch (err) {
       console.error('Error creating comment:', err);
@@ -703,7 +735,11 @@ const Feed = () => {
             </div>
           ) : (
             posts.map(post => (
-              <Card key={post.id} className="custom-card mb-4">
+              <Card 
+                key={post.id} 
+                className="custom-card mb-4"
+                onClick={() => handlePostView(post.id)}
+              >
                 {/* Post Header */}
                 <Card.Header className="bg-white d-flex align-items-center">
                   {users[post.userId]?.profileImage ? (
@@ -765,7 +801,10 @@ const Feed = () => {
                     <Button
                       variant="link"
                       className={`text-decoration-none ${isPostLikedByUser(post.id) ? 'text-danger' : 'text-muted'}`}
-                      onClick={() => handleLikeToggle(post.id)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering Card's onClick
+                        handleLikeToggle(post.id);
+                      }}
                     >
                       {isPostLikedByUser(post.id) ? (
                         <FaHeart className="me-1" />
@@ -777,14 +816,23 @@ const Feed = () => {
                     <Button
                       variant="link"
                       className="text-decoration-none text-muted ms-3"
+                      onClick={(e) => e.stopPropagation()} // Prevent triggering Card's onClick
                     >
                       <FaComment className="me-1" />
                       {(comments[post.id] || []).length}
+                      {unreadCommentCounts[post.id] > 0 && (
+                        <Badge pill bg="danger" className="ms-1">
+                          {unreadCommentCounts[post.id]}
+                        </Badge>
+                      )}
                     </Button>
                     <Button
                       variant="link"
                       className={`text-decoration-none ${bookmarkedPosts[post.id] ? 'text-primary' : 'text-muted'} ms-3`}
-                      onClick={() => handleBookmarkToggle(post)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering Card's onClick
+                        handleBookmarkToggle(post);
+                      }}
                     >
                       {bookmarkedPosts[post.id] ? (
                         <FaBookmark className="me-1" />
@@ -796,7 +844,7 @@ const Feed = () => {
                   </div>
                 </Card.Body>
                 {/* Comments Section */}
-                <Card.Footer className="bg-white">
+                <Card.Footer className="bg-white" onClick={(e) => e.stopPropagation()}>
                   {/* Comment List */}
                   {comments[post.id] && comments[post.id].length > 0 && (
                     <div className="mb-3">
