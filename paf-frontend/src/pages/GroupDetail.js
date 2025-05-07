@@ -669,7 +669,7 @@ const GroupDetail = () => {
                   <p className="text-muted">No specific rules have been set for this group.</p>
                 )}
                 
-                <h4 className="mb-3">About This Group</h4>
+                <h4 className="mb-3">About Group</h4>
                 <Card className="mb-4">
                   <Card.Body>
                     <Row>
@@ -690,7 +690,7 @@ const GroupDetail = () => {
         </Card>
       </Tab.Container>
       
-      {/* Members Modal */}
+   
       <Modal 
         show={showMembersModal} 
         onHide={() => setShowMembersModal(false)}
