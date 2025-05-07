@@ -134,6 +134,39 @@ const GroupDetail = () => {
     }
   };
 
+  // Add this function to the GroupDetail component
+  const handleRemoveMember = async (memberId) => {
+    if (!isCreator || memberId === currentUser.id) return;
+    
+    try {
+      // Remove from members
+      const updatedMembers = group.memberIds.filter(id => id !== memberId);
+      
+      // Also remove from admins if they are an admin
+      const updatedAdmins = group.adminIds.filter(id => id !== memberId);
+      
+      // Update the group
+      await groupService.updateGroupMembers(groupId, updatedMembers);
+      
+      if (group.adminIds.includes(memberId)) {
+        await groupService.updateGroupAdmins(groupId, updatedAdmins);
+      }
+      
+      // Update local state
+      setGroup(prev => ({
+        ...prev,
+        memberIds: updatedMembers,
+        adminIds: updatedAdmins
+      }));
+      
+      // Show success message
+      alert(`Member removed successfully`);
+    } catch (err) {
+      console.error('Error removing member:', err);
+      alert('Failed to remove member. Please try again.');
+    }
+  };
+
   const handleDeleteGroup = async () => {
     if (!isCreator) return;
     
@@ -568,9 +601,8 @@ const GroupDetail = () => {
                         variant="outline-danger" 
                         size="sm"
                         onClick={() => {
-                          // Handle remove member logic
                           if (window.confirm(`Remove ${users[memberId]?.username || 'this user'} from the group?`)) {
-                            // Implementation goes here
+                            handleRemoveMember(memberId);
                           }
                         }}
                       >
