@@ -19,6 +19,8 @@ const Notifications = () => {
 }, [currentUser]);
 
 // fetchNotifications function
+
+
 const fetchNotifications = async () => {
   try {
     setLoading(true);
