@@ -109,19 +109,7 @@ const fetchNotifications = async () => {
     }
   };
 
-  const getNotificationLink = (notification) => {
-    const { sourceType, sourceId } = notification;
-    
-    switch (sourceType) {
-      case 'post':
-        return `/posts/${sourceId}`;
-      case 'group':
-        return `/groups/${sourceId}`;
-      default:
-        return '#';
-    }
-  };
-
+  
   if (loading) {
     return (
       <Container className="py-5 text-center">
@@ -140,6 +128,19 @@ const fetchNotifications = async () => {
     <FaCheck className="me-2" /> Mark All as Read
   </Button>
 )}
+
+const getNotificationLink = (notification) => {
+  const { sourceType, sourceId } = notification;
+  
+  switch (sourceType) {
+    case 'post':
+      return `/posts/${sourceId}`;
+    case 'group':
+      return `/groups/${sourceId}`;
+    default:
+      return '#';
+  }
+};
 
 
   return (
