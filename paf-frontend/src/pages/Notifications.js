@@ -57,19 +57,19 @@ const fetchNotifications = async () => {
   };
 
   const handleMarkAsRead = async (notificationId) => {
-    try {
-      await notificationService.markAsRead(notificationId);
-      
-      // Update local state
-      setNotifications(prev => prev.map(notif => 
-        notif.id === notificationId 
-          ? { ...notif, read: true } 
-          : notif
-      ));
-    } catch (err) {
-      console.error('Error marking notification as read:', err);
-    }
-  };
+  try {
+    await notificationService.markAsRead(notificationId);
+    setNotifications(prev => prev.map(notif => 
+      notif.id === notificationId 
+        ? { ...notif, read: true } 
+        : notif
+    ));
+  } catch (err) {
+    console.error('Error marking notification as read:', err);
+  }
+};
+
+
 
   const handleMarkAllAsRead = async () => {
     try {
