@@ -137,12 +137,14 @@ const fetchNotifications = async () => {
         <h2>Notifications</h2>
         
         {notifications.some(notif => !notif.read) && (
-          <Button 
-            variant="outline-primary" 
-            onClick={handleMarkAllAsRead}
-          >
-            <FaCheck className="me-2" /> Mark All as Read
-          </Button>
+         <Button 
+  variant="link" 
+  className="text-primary p-0 me-3" 
+  onClick={() => handleMarkAsRead(notification.id)}
+  title="Mark as read"
+>
+  <FaCheck />
+</Button>
         )}
       </div>
       
