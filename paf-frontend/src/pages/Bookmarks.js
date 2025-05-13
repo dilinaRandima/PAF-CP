@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Spinner, Alert, Form, Modal, Badge } from 'react-bootstrap';
 import { AuthContext } from '../context/AuthContext';
@@ -10,6 +10,10 @@ const Bookmarks = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const searchInputRef = useRef(null);
+  const [sortDirection, setSortDirection] = useState('desc');
   const [editingBookmark, setEditingBookmark] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
@@ -41,6 +45,10 @@ const Bookmarks = () => {
   };
 
   const handleModalClose = () => {
+    if (hasUnsavedChanges() && !window.confirm('You have unsaved changes. Are you sure you want to close?')) {
+      return;
+    }
+
     setShowModal(false);
     setEditingBookmark(null);
     setFormData({
@@ -50,6 +58,18 @@ const Bookmarks = () => {
       note: '',
       tags: ''
     });
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
   };
 
   const handleModalShow = (bookmark = null) => {
@@ -76,6 +96,7 @@ const Bookmarks = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     
     try {
       const tagsArray = formData.tags
@@ -101,7 +122,22 @@ const Bookmarks = () => {
     } catch (err) {
       console.error('Error saving bookmark:', err);
       setError('Failed to save bookmark. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
+
+  };
+
+  const hasUnsavedChanges = () => {
+    if (!editingBookmark) {
+      return formData.title || formData.resourceId || formData.note || formData.tags;
+    }
+
+    return formData.title !== (editingBookmark.title || '') ||
+        formData.resourceId !== (editingBookmark.resourceId || '') ||
+        formData.resourceType !== (editingBookmark.resourceType || 'external') ||
+        formData.note !== (editingBookmark.note || '') ||
+        formData.tags !== (editingBookmark.tags ? editingBookmark.tags.join(', ') : '');
   };
 
   const handleDelete = async (bookmarkId) => {
