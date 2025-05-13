@@ -72,11 +72,29 @@ const Feed = () => {
   const [editingComment, setEditingComment] = useState({ id: null, text: '' });
   // Add state to track bookmarked posts
   const [bookmarkedPosts, setBookmarkedPosts] = useState({});
-  //ADD post search
-  const [searchTerm, setSearchTerm] = useState('');
+
 
   useEffect(() => {
     fetchPosts();
+
+    // Add CSS for comment highlight animation
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .comment-highlight {
+        animation: highlightComment 3s ease;
+      }
+      
+      @keyframes highlightComment {
+        0% { background-color: rgba(255, 255, 0, 0.3); }
+        100% { background-color: transparent; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Clean up style on unmount
+    return () => {
+      document.head.removeChild(style);
+    };
   }, []);
 
   // Add useEffect to load user's bookmarks when component mounts
@@ -170,6 +188,26 @@ const Feed = () => {
     setUsers(usersObject);
   };
 
+  // Function to handle post view and track comment counts
+  const handlePostView = (postId) => {
+    const currentCommentCount = (comments[postId] || []).length;
+    
+    // Update unread count
+    const lastCount = lastViewedCommentCounts[postId] || 0;
+    const unreadCount = Math.max(0, currentCommentCount - lastCount);
+    
+    setUnreadCommentCounts(prev => ({
+      ...prev,
+      [postId]: unreadCount
+    }));
+    
+    // Update last viewed count
+    setLastViewedCommentCounts(prev => ({
+      ...prev,
+      [postId]: currentCommentCount
+    }));
+  };
+
   const handleNewPostChange = (e) => {
     const { name, value } = e.target;
     setNewPost(prev => ({
@@ -259,14 +297,42 @@ const Feed = () => {
         [postId]: [...(prev[postId] || []), createdComment]
       }));
       
+      // Mark comment as newly added
+      setNewlyAddedComments(prev => ({
+        ...prev,
+        [createdComment.id]: true
+      }));
+      
+      // Remove the highlight after 3 seconds
+      setTimeout(() => {
+        setNewlyAddedComments(prev => {
+          const updated = {...prev};
+          delete updated[createdComment.id];
+          return updated;
+        });
+      }, 3000);
+      
       // Clear the comment input
       setNewComment(prev => ({
         ...prev,
         [postId]: ''
       }));
+      
+      // Add toast notification
+      toast.success('Comment posted successfully!');
+      
+      // Update unread comment counts for other users
+      const updatedCount = (comments[postId] || []).length + 1;
+      if (lastViewedCommentCounts[postId] !== undefined) {
+        setUnreadCommentCounts(prev => ({
+          ...prev,
+          [postId]: Math.max(0, updatedCount - lastViewedCommentCounts[postId])
+        }));
+      }
+      
     } catch (err) {
       console.error('Error creating comment:', err);
-      alert('Failed to post comment. Please try again.');
+      toast.error('Failed to post comment. Please try again.');
     } finally {
       setSubmittingComment(false);
     }
@@ -285,9 +351,13 @@ const Feed = () => {
         ...prev,
         [postId]: prev[postId].filter(comment => comment.id !== commentId)
       }));
+      
+      // Add toast notification
+      toast.success('Comment deleted successfully!');
+      
     } catch (err) {
       console.error('Error deleting comment:', err);
-      alert('Failed to delete comment. Please try again.');
+      toast.error('Failed to delete comment. Please try again.');
     }
   };
 
@@ -312,6 +382,12 @@ const Feed = () => {
       
       await commentService.updateComment(editingComment.id, commentData, currentUser.id);
       
+      // Mark comment as edited
+      setEditedComments(prev => ({
+        ...prev,
+        [editingComment.id]: true
+      }));
+      
       // Update comments state
       setComments(prev => ({
         ...prev,
@@ -323,9 +399,13 @@ const Feed = () => {
       }));
       
       setEditingComment({ id: null, text: '' });
+      
+      // Add toast notification
+      toast.success('Comment updated successfully!');
+      
     } catch (err) {
       console.error('Error updating comment:', err);
-      alert('Failed to update comment. Please try again.');
+      toast.error('Failed to update comment. Please try again.');
     }
   };
 
@@ -341,8 +421,10 @@ const Feed = () => {
           ...prev,
           [postId]: prev[postId].filter(like => like.id !== userLike.id)
         }));
+        toast.info('Post unliked');
       } catch (err) {
         console.error('Error removing like:', err);
+        toast.error('Failed to unlike the post. Please try again.');
       }
     } else {
       // User hasn't liked the post, so like it
@@ -358,8 +440,10 @@ const Feed = () => {
           ...prev,
           [postId]: [...(prev[postId] || []), createdLike]
         }));
+        toast.success('Post liked!');
       } catch (err) {
         console.error('Error adding like:', err);
+        toast.error('Failed to like the post. Please try again.');
       }
     }
   };
@@ -724,7 +808,11 @@ const Feed = () => {
             </div>
           ) : (
             posts.map(post => (
-              <Card key={post.id} className="custom-card mb-4">
+              <Card 
+                key={post.id} 
+                className="custom-card mb-4"
+                onClick={() => handlePostView(post.id)}
+              >
                 {/* Post Header */}
                 <Card.Header className="bg-white d-flex align-items-center">
                   {users[post.userId]?.profileImage ? (
@@ -786,7 +874,10 @@ const Feed = () => {
                     <Button
                       variant="link"
                       className={`text-decoration-none ${isPostLikedByUser(post.id) ? 'text-danger' : 'text-muted'}`}
-                      onClick={() => handleLikeToggle(post.id)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering Card's onClick
+                        handleLikeToggle(post.id);
+                      }}
                     >
                       {isPostLikedByUser(post.id) ? (
                         <FaHeart className="me-1" />
@@ -798,14 +889,23 @@ const Feed = () => {
                     <Button
                       variant="link"
                       className="text-decoration-none text-muted ms-3"
+                      onClick={(e) => e.stopPropagation()} // Prevent triggering Card's onClick
                     >
                       <FaComment className="me-1" />
                       {(comments[post.id] || []).length}
+                      {unreadCommentCounts[post.id] > 0 && (
+                        <Badge pill bg="danger" className="ms-1">
+                          {unreadCommentCounts[post.id]}
+                        </Badge>
+                      )}
                     </Button>
                     <Button
                       variant="link"
                       className={`text-decoration-none ${bookmarkedPosts[post.id] ? 'text-primary' : 'text-muted'} ms-3`}
-                      onClick={() => handleBookmarkToggle(post)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering Card's onClick
+                        handleBookmarkToggle(post);
+                      }}
                     >
                       {bookmarkedPosts[post.id] ? (
                         <FaBookmark className="me-1" />
@@ -817,19 +917,22 @@ const Feed = () => {
                   </div>
                 </Card.Body>
                 {/* Comments Section */}
-                <Card.Footer className="bg-white">
+                <Card.Footer className="bg-white" onClick={(e) => e.stopPropagation()}>
                   {/* Comment List */}
                   {comments[post.id] && comments[post.id].length > 0 && (
                     <div className="mb-3">
                       {comments[post.id].map(comment => (
-                        <div key={comment.id} className="d-flex mb-2">
+                        <div 
+                          key={comment.id} 
+                          className={`d-flex mb-2 ${newlyAddedComments[comment.id] ? 'comment-highlight' : ''}`}
+                        >
                           <FaUserCircle size={30} className="text-secondary me-2 mt-1" />
                           <div className="bg-light p-2 rounded flex-grow-1">
                             <div className="d-flex justify-content-between">
                               <strong>{users[comment.userId]?.username || 'Unknown User'}</strong>
                               <div>
                                 <small className="text-muted me-2">
-                                  {formatTimeAgo(comment.timestamp)}
+                                  {formatTimeAgo(comment.timestamp)} {editedComments[comment.id] && "(Edited)"}
                                 </small>
                                 {/* Show edit button only to comment author */}
                                 {comment.userId === currentUser.id && (
