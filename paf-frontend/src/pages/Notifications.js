@@ -130,6 +130,15 @@ const fetchNotifications = async () => {
       </Container>
     );
   }
+  {notifications.some(notif => !notif.read) && (
+  <Button 
+    variant="outline-primary" 
+    onClick={handleMarkAllAsRead}
+  >
+    <FaCheck className="me-2" /> Mark All as Read
+  </Button>
+)}
+
 
   return (
     <Container className="py-4">
@@ -137,7 +146,9 @@ const fetchNotifications = async () => {
         <h2>Notifications</h2>
         
         {notifications.some(notif => !notif.read) && (
+          
          <Button 
+         
   variant="link" 
   className="text-primary p-0 me-3" 
   onClick={() => handleMarkAsRead(notification.id)}
@@ -145,6 +156,7 @@ const fetchNotifications = async () => {
 >
   <FaCheck />
 </Button>
+
         )}
       </div>
       
