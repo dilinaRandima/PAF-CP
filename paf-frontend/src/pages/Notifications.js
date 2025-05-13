@@ -13,30 +13,30 @@ const Notifications = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (currentUser) {
-      fetchNotifications();
-    }
-  }, [currentUser]);
+  if (currentUser) {
+    fetchNotifications();
+  }
+}, [currentUser]);
 
-  const fetchNotifications = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await notificationService.getUserNotifications(currentUser.id);
-      setNotifications(response.data);
-      
-      // Get unique user IDs from notifications
-      const userIds = [...new Set(response.data.map(notif => notif.actionUserId).filter(Boolean))];
-      await fetchUsers(userIds);
-      
-    } catch (err) {
-      console.error('Error fetching notifications:', err);
-      setError('Failed to load notifications. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
+// fetchNotifications function
+const fetchNotifications = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    
+    const response = await notificationService.getUserNotifications(currentUser.id);
+    setNotifications(response.data);
+    
+    const userIds = [...new Set(response.data.map(notif => notif.actionUserId).filter(Boolean))];
+    await fetchUsers(userIds);
+    
+  } catch (err) {
+    console.error('Error fetching notifications:', err);
+    setError('Failed to load notifications. Please try again later.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchUsers = async (userIds) => {
     const usersObject = { ...users };
