@@ -42,10 +42,10 @@ public class BookmarkController {
 
     // Create a new bookmark
     @PostMapping
-    public ResponseEntity<Bookmark> createBookmark(@RequestBody Bookmark bookmark) {
+    public ResponseEntity<?> createBookmark(@RequestBody Bookmark bookmark) {
         // Check if bookmark already exists
         if (bookmarkRepository.existsByUserIdAndResourceId(bookmark.getUserId(), bookmark.getResourceId())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Bookmark already exists");
         }
         
         bookmark.setCreatedAt(new Date());
