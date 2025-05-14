@@ -5,6 +5,8 @@ import com.example.pafbackend.repositories.BookmarkRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -18,6 +20,8 @@ public class BookmarkController {
 
     @Autowired
     private BookmarkRepository bookmarkRepository;
+    // Add at the class level
+    private final Logger logger = LoggerFactory.getLogger(BookmarkController.class);
 
     // Get all user bookmarks
     @GetMapping("/{userId}")
@@ -42,10 +46,12 @@ public class BookmarkController {
 
     // Create a new bookmark
     @PostMapping
-    public ResponseEntity<Bookmark> createBookmark(@RequestBody Bookmark bookmark) {
+    public ResponseEntity<?> createBookmark(@RequestBody Bookmark bookmark) {
+
+        logger.info("Creating bookmark for user: {}, resource: {}", bookmark.getUserId(), bookmark.getResourceId());
         // Check if bookmark already exists
         if (bookmarkRepository.existsByUserIdAndResourceId(bookmark.getUserId(), bookmark.getResourceId())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Bookmark already exists");
         }
         
         bookmark.setCreatedAt(new Date());
