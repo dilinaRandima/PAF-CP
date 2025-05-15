@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, Button, Spinner, Alert, Badge } from 'react-
 import { AuthContext } from '../context/AuthContext';
 import { notificationService, userService } from '../api/apiService';
 import { FaBell, FaCheck, FaTrash, FaHeart, FaComment, FaUsers } from 'react-icons/fa';
-
+import '../styles/Notifications.css';
 const Notifications = () => {
   const { currentUser } = useContext(AuthContext);
   const [notifications, setNotifications] = useState([]);
