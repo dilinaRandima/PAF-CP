@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-
+import './styles/comment-section-vertical-fix.css';
+import './styles/comment-full-width-fix.css';
 // Pages
 import Home from './pages/Home';
 import Login from './pages/Login';
