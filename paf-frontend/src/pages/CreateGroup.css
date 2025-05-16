@@ -3,7 +3,7 @@
     padding: 40px 20px;
     min-height: 100vh;
     background-image: linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 248, 241, 0.92)),
-                      url('https://images.unsplash.com/photo-1518291344630-4857135fb581?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80');
+      url('https://images.unsplash.com/photo-1518291344630-4857135fb581?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -24,10 +24,10 @@
   }
   
   @keyframes communityFloat {
-    from { 
+    from {
       transform: translateX(100%) rotate(0deg);
     }
-    to { 
+    to {
       transform: translateX(-100%) rotate(-360deg);
     }
   }
@@ -71,6 +71,7 @@
     background: linear-gradient(45deg, #e67e22, #2ecc71, #3498db);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
     animation: gradientMove 3s ease infinite;
   }
   
@@ -102,21 +103,21 @@
     animation: imagePulse 3s ease-in-out infinite;
   }
   
-  @keyframes imagePulse {
-    0%, 100% { 
-      transform: scale(1);
-      box-shadow: 0 0 0 0 rgba(230, 126, 34, 0.3);
-    }
-    50% { 
-      transform: scale(1.02);
-      box-shadow: 0 0 0 10px rgba(230, 126, 34, 0);
-    }
-  }
-  
   .group-image-preview:hover {
     transform: scale(1.05);
     border-color: #d35400;
     background: rgba(230, 126, 34, 0.1);
+  }
+  
+  @keyframes imagePulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(230, 126, 34, 0.3);
+    }
+    50% {
+      transform: scale(1.02);
+      box-shadow: 0 0 0 10px rgba(230, 126, 34, 0);
+    }
   }
   
   /* Form fields */
@@ -214,3 +215,4 @@
     transform: scale(1.05);
     box-shadow: 0 10px 30px rgba(46, 204, 113, 0.4);
   }
+  
