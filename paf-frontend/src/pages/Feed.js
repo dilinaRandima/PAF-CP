@@ -701,7 +701,7 @@ const Feed = () => {
           </Card>
 
           {/* ADD SEARCH INPUT HERE - right after the post creation card and before posts display */}
-          <div className="mb-4">
+          <div className="mb-4 position-relative">
             <Form.Control
                 type="text"
                 placeholder="Search recipes by title, description or cuisine..."
@@ -709,6 +709,15 @@ const Feed = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
             />
+            {searchTerm && (
+                <Button
+                    variant="link"
+                    className="position-absolute top-50 end-0 translate-middle-y border-0"
+                    onClick={() => setSearchTerm('')}
+                >
+                  ✕
+                </Button>
+            )}
           </div>
 
           {/* ADD THIS REFRESH BUTTON */}
