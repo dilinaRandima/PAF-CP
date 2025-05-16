@@ -81,12 +81,15 @@ export const postService = {
 };
 // Comment services
 export const commentService = {
-createComment: (commentData, userId) => api.post(`/comments?userId=${userId}`, commentData),
-getAllComments: () => api.get('/comments'),
-getCommentById: (id) => api.get(`/comments/${id}`),
-getCommentsByPostId: (postId) => api.get(`/comments/post/${postId}`),
-updateComment: (id, commentData, userId) => api.put(`/comments/${id}?userId=${userId}`, commentData),
-deleteComment: (id, userId) => api.delete(`/comments/${id}?userId=${userId}`),
+  createComment: (commentData) => {
+    // Remove notification creation from here, it will be handled in Feed.js
+    return api.post(`/api/comments/${commentData.postId}`, commentData);
+  },
+  getAllComments: () => api.get('/api/comments'),
+  getCommentById: (id) => api.get(`/api/comments/${id}`),
+  getCommentsByPostId: (postId) => api.get(`/api/comments/post/${postId}`),
+  updateComment: (id, commentText) => api.put(`/api/comments/${id}`, { commentText }),
+  deleteComment: (id) => api.delete(`/api/comments/${id}`),
 };
 // Like services
 export const likeService = {

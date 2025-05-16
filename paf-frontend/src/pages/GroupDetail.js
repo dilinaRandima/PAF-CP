@@ -9,17 +9,18 @@ import {
   FaUserMinus, 
   FaTrash, 
   FaEdit, 
-  FaCog, 
-  FaInfoCircle, 
+  FaInfoCircle,
   FaEllipsisH,
-  FaUserCircle  // Added this import
+  FaUserCircle
 } from 'react-icons/fa';
 
 const GroupDetail = () => {
+  // Get URL params and context
   const { groupId } = useParams();
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
   
+  // Main state
   const [group, setGroup] = useState(null);
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState({});
@@ -27,34 +28,36 @@ const GroupDetail = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('posts');
   const [newPost, setNewPost] = useState({ content: '', mediaUrl: '', mediaType: '' });
-  const [submitting, setSubmitting] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   
-  // Check if current user is a member
+  // Loading states
+  const [isActionLoading, setIsActionLoading] = useState({});
+  
+  // User role checks
   const isMember = group?.memberIds?.includes(currentUser.id);
-  // Check if current user is an admin
   const isAdmin = group?.adminIds?.includes(currentUser.id);
-  // Check if current user is the creator
   const isCreator = group?.creatorId === currentUser.id;
 
+  // Fetch data on component mount
   useEffect(() => {
     fetchGroupData();
   }, [groupId]);
 
+  // Main data fetching function
   const fetchGroupData = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // Fetch group details
+      // Get group data
       const groupResponse = await groupService.getGroupById(groupId);
       setGroup(groupResponse.data);
       
-      // Fetch group posts
+      // Get posts
       const postsResponse = await groupPostService.getPostsByGroupId(groupId);
       setPosts(postsResponse.data);
       
-      // Get all user IDs from group and posts
+      // Get all user IDs we need to fetch
       const userIds = [
         groupResponse.data.creatorId,
         ...groupResponse.data.memberIds,
@@ -65,57 +68,104 @@ const GroupDetail = () => {
       await fetchUsers([...new Set(userIds)]);
       
     } catch (err) {
-      console.error('Error fetching group data:', err);
-      setError('Failed to load group data. Please try again later.');
+      handleError(err, 'Failed to load group data');
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchUsers = async (userIds) => {
-    const usersObject = { ...users };
+  // Error handling helper
+  const handleError = (error, defaultMessage = 'An error occurred') => {
+    console.error(`${defaultMessage}:`, error);
     
-    for (const userId of userIds) {
-      if (!usersObject[userId] && userId) {
-        try {
-          const response = await userService.getUserById(userId);
-          usersObject[userId] = response.data;
-        } catch (err) {
-          console.error(`Error fetching user ${userId}:`, err);
-          usersObject[userId] = { username: 'Unknown User' };
-        }
-      }
+    let message = defaultMessage;
+    if (error.response?.data?.message) {
+      message = error.response.data.message;
+    } else if (error.request) {
+      message = 'Network error. Please check your connection.';
     }
     
-    setUsers(usersObject);
+    setError({ variant: 'danger', message });
+    setTimeout(() => setError(null), 5000);
   };
 
+  // Show success message helper
+  const showSuccess = (message) => {
+    setError({ variant: 'success', message });
+    setTimeout(() => setError(null), 3000);
+  };
+
+  // Set loading state for an action
+  const setActionLoading = (action, isLoading) => {
+    setIsActionLoading(prev => ({ ...prev, [action]: isLoading }));
+  };
+
+  // Fetch users helper
+  const fetchUsers = async (userIds) => {
+    const missingUserIds = userIds.filter(id => id && !users[id]);
+    
+    if (missingUserIds.length === 0) return;
+    
+    try {
+      const batchSize = 20;
+      let newUsers = { ...users };
+      
+      for (let i = 0; i < missingUserIds.length; i += batchSize) {
+        const batch = missingUserIds.slice(i, i + batchSize);
+        
+        try {
+          // Try batch API first
+          const response = await userService.getUsersByIds(batch);
+          Object.assign(newUsers, response.data);
+        } catch (err) {
+          // Fall back to individual requests
+          await Promise.all(
+            batch.map(async (userId) => {
+              try {
+                const response = await userService.getUserById(userId);
+                newUsers[userId] = response.data;
+              } catch (err) {
+                newUsers[userId] = { username: 'Unknown User' };
+              }
+            })
+          );
+        }
+      }
+      
+      setUsers(newUsers);
+    } catch (err) {
+      handleError(err, 'Error fetching user data');
+    }
+  };
+
+  // Join group handler
   const handleJoinGroup = async () => {
     if (!group) return;
     
     try {
+      setActionLoading('join', true);
+      
       const updatedMembers = [...group.memberIds, currentUser.id];
       await groupService.updateGroupMembers(groupId, updatedMembers);
       
-      // Update local state
-      setGroup(prev => ({
-        ...prev,
-        memberIds: updatedMembers
-      }));
+      setGroup(prev => ({ ...prev, memberIds: updatedMembers }));
+      showSuccess('Successfully joined the group');
     } catch (err) {
-      console.error('Error joining group:', err);
-      alert('Failed to join group. Please try again.');
+      handleError(err, 'Failed to join group');
+    } finally {
+      setActionLoading('join', false);
     }
   };
 
+  // Leave group handler
   const handleLeaveGroup = async () => {
     if (!group || isCreator) return;
     
-    if (!window.confirm('Are you sure you want to leave this group?')) {
-      return;
-    }
+    if (!window.confirm('Are you sure you want to leave this group?')) return;
     
     try {
+      setActionLoading('leave', true);
+      
       const updatedMembers = group.memberIds.filter(id => id !== currentUser.id);
       const updatedAdmins = group.adminIds.filter(id => id !== currentUser.id);
       
@@ -125,49 +175,111 @@ const GroupDetail = () => {
         await groupService.updateGroupAdmins(groupId, updatedAdmins);
       }
       
-      // Update local state
       setGroup(prev => ({
         ...prev,
         memberIds: updatedMembers,
         adminIds: updatedAdmins
       }));
+      
+      showSuccess('Successfully left the group');
     } catch (err) {
-      console.error('Error leaving group:', err);
-      alert('Failed to leave group. Please try again.');
+      handleError(err, 'Failed to leave group');
+    } finally {
+      setActionLoading('leave', false);
     }
   };
 
+  // Remove member handler
+  const handleRemoveMember = async (memberId) => {
+    if (!isCreator || memberId === currentUser.id) return;
+    
+    try {
+      setActionLoading(`remove_${memberId}`, true);
+      
+      const updatedMembers = group.memberIds.filter(id => id !== memberId);
+      const updatedAdmins = group.adminIds.filter(id => id !== memberId);
+      
+      await groupService.updateGroupMembers(groupId, updatedMembers);
+      
+      if (group.adminIds.includes(memberId)) {
+        await groupService.updateGroupAdmins(groupId, updatedAdmins);
+      }
+      
+      setGroup(prev => ({
+        ...prev,
+        memberIds: updatedMembers,
+        adminIds: updatedAdmins
+      }));
+      
+      showSuccess('Member removed successfully');
+    } catch (err) {
+      handleError(err, 'Failed to remove member');
+    } finally {
+      setActionLoading(`remove_${memberId}`, false);
+    }
+  };
+
+  // Toggle admin status handler
+  const handleToggleAdmin = async (memberId, makeAdmin) => {
+    if (!isCreator || memberId === currentUser.id) return;
+    
+    const actionName = makeAdmin ? 'make_admin' : 'remove_admin';
+    
+    try {
+      setActionLoading(`${actionName}_${memberId}`, true);
+      
+      let updatedAdmins;
+      if (makeAdmin) {
+        updatedAdmins = [...group.adminIds, memberId];
+      } else {
+        updatedAdmins = group.adminIds.filter(id => id !== memberId);
+      }
+      
+      await groupService.updateGroupAdmins(groupId, updatedAdmins);
+      
+      setGroup(prev => ({
+        ...prev,
+        adminIds: updatedAdmins
+      }));
+      
+      showSuccess(makeAdmin ? 'Admin added successfully' : 'Admin removed successfully');
+    } catch (err) {
+      handleError(err, makeAdmin ? 'Failed to add admin' : 'Failed to remove admin');
+    } finally {
+      setActionLoading(`${actionName}_${memberId}`, false);
+    }
+  };
+
+  // Delete group handler
   const handleDeleteGroup = async () => {
     if (!isCreator) return;
     
-    if (!window.confirm('Are you sure you want to delete this group? This action cannot be undone.')) {
-      return;
-    }
+    if (!window.confirm('Are you sure you want to delete this group?')) return;
     
     try {
+      setActionLoading('delete', true);
       await groupService.deleteGroup(groupId);
       navigate('/groups');
     } catch (err) {
-      console.error('Error deleting group:', err);
-      alert('Failed to delete group. Please try again.');
+      handleError(err, 'Failed to delete group');
+      setActionLoading('delete', false);
     }
   };
 
-  const handleNewPostChange = (e) => {
+  // New post form change handler
+  const handlePostInputChange = (e) => {
     const { name, value } = e.target;
-    setNewPost(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setNewPost(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleNewPostSubmit = async (e) => {
+  // Submit new post handler
+  const handleSubmitPost = async (e) => {
     e.preventDefault();
     
     if (!newPost.content) return;
     
     try {
-      setSubmitting(true);
+      setActionLoading('post', true);
       
       const postData = {
         ...newPost,
@@ -177,35 +289,36 @@ const GroupDetail = () => {
       
       const response = await groupPostService.createPost(postData);
       
-      // Add new post to the list
       setPosts(prev => [response.data, ...prev]);
-      
-      // Clear the form
       setNewPost({ content: '', mediaUrl: '', mediaType: '' });
+      
+      showSuccess('Post created successfully');
     } catch (err) {
-      console.error('Error creating post:', err);
-      alert('Failed to create post. Please try again.');
+      handleError(err, 'Failed to create post');
     } finally {
-      setSubmitting(false);
+      setActionLoading('post', false);
     }
   };
 
+  // Delete post handler
   const handleDeletePost = async (postId) => {
-    if (!window.confirm('Are you sure you want to delete this post?')) {
-      return;
-    }
+    if (!window.confirm('Are you sure you want to delete this post?')) return;
     
     try {
-      await groupPostService.deletePost(postId);
+      setActionLoading(`delete_post_${postId}`, true);
       
-      // Remove post from the list
+      await groupPostService.deletePost(postId);
       setPosts(prev => prev.filter(post => post.id !== postId));
+      
+      showSuccess('Post deleted successfully');
     } catch (err) {
-      console.error('Error deleting post:', err);
-      alert('Failed to delete post. Please try again.');
+      handleError(err, 'Failed to delete post');
+    } finally {
+      setActionLoading(`delete_post_${postId}`, false);
     }
   };
 
+  // Loading state component
   if (loading) {
     return (
       <Container className="py-5 text-center">
@@ -217,15 +330,7 @@ const GroupDetail = () => {
     );
   }
 
-  if (error) {
-    return (
-      <Container className="py-5">
-        <Alert variant="danger">{error}</Alert>
-        <Button onClick={fetchGroupData}>Try Again</Button>
-      </Container>
-    );
-  }
-
+  // Group not found state
   if (!group) {
     return (
       <Container className="py-5">
@@ -237,8 +342,20 @@ const GroupDetail = () => {
 
   return (
     <Container className="py-4">
-      {/* Group Header */}
-      <Card className="custom-card mb-4">
+      {/* Error/Success Message */}
+      {error && (
+        <Alert 
+          variant={error.variant || "danger"} 
+          dismissible 
+          onClose={() => setError(null)}
+          className="mb-4"
+        >
+          {error.message || error}
+        </Alert>
+      )}
+      
+      {/* Group Header Card */}
+      <Card className="mb-4">
         {group.imageUrl && (
           <div className="position-relative">
             <img 
@@ -261,55 +378,71 @@ const GroupDetail = () => {
               <p className="text-muted">
                 Created by {users[group.creatorId]?.username || 'Unknown User'} • {group.memberIds?.length || 0} members
               </p>
-              {group.tags && group.tags.length > 0 && (
+              {group.tags?.length > 0 && (
                 <div className="mb-3">
                   {group.tags.map((tag, index) => (
-                    <Badge bg="secondary" className="me-1 mb-1" key={index}>
-                      {tag}
-                    </Badge>
+                    <Badge bg="secondary" className="me-1 mb-1" key={index}>{tag}</Badge>
                   ))}
                 </div>
               )}
             </div>
             
             <div>
+              {/* Join/Leave Button */}
               {isMember ? (
                 <Button 
                   variant="outline-danger" 
                   onClick={handleLeaveGroup}
-                  disabled={isCreator}
+                  disabled={isCreator || isActionLoading.leave}
                   title={isCreator ? "Creators cannot leave their groups" : "Leave group"}
                 >
-                  <FaUserMinus className="me-2" /> Leave
+                  {isActionLoading.leave ? (
+                    <><Spinner as="span" animation="border" size="sm" className="me-2" /> Leaving...</>
+                  ) : (
+                    <><FaUserMinus className="me-2" /> Leave</>
+                  )}
                 </Button>
               ) : (
                 <Button 
                   variant="outline-primary" 
                   onClick={handleJoinGroup}
+                  disabled={isActionLoading.join}
                 >
-                  <FaUserPlus className="me-2" /> Join
+                  {isActionLoading.join ? (
+                    <><Spinner as="span" animation="border" size="sm" className="me-2" /> Joining...</>
+                  ) : (
+                    <><FaUserPlus className="me-2" /> Join</>
+                  )}
                 </Button>
               )}
               
+              {/* Group Admin Actions */}
               {isCreator && (
                 <div className="dropdown d-inline-block ms-2">
                   <Button 
                     variant="outline-secondary" 
                     id="group-actions-dropdown"
                     data-bs-toggle="dropdown" 
-                    aria-expanded="false"
                   >
                     <FaEllipsisH />
                   </Button>
-                  <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="group-actions-dropdown">
+                  <ul className="dropdown-menu dropdown-menu-end">
                     <li>
                       <Link to={`/edit-group/${groupId}`} className="dropdown-item">
                         <FaEdit className="me-2" /> Edit Group
                       </Link>
                     </li>
                     <li>
-                      <button className="dropdown-item text-danger" onClick={handleDeleteGroup}>
-                        <FaTrash className="me-2" /> Delete Group
+                      <button 
+                        className="dropdown-item text-danger" 
+                        onClick={handleDeleteGroup}
+                        disabled={isActionLoading.delete}
+                      >
+                        {isActionLoading.delete ? (
+                          <><Spinner as="span" animation="border" size="sm" className="me-2" /> Deleting...</>
+                        ) : (
+                          <><FaTrash className="me-2" /> Delete Group</>
+                        )}
                       </button>
                     </li>
                   </ul>
@@ -318,26 +451,19 @@ const GroupDetail = () => {
             </div>
           </div>
           
-          {group.description && (
-            <p className="mb-4">{group.description}</p>
-          )}
+          {/* Group Description */}
+          {group.description && <p className="mb-0">{group.description}</p>}
         </Card.Body>
       </Card>
 
-      {/* Group Content */}
+      {/* Group Content Tabs */}
       <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
-        <Card className="custom-card">
+        <Card>
           <Card.Header>
             <Nav variant="tabs">
-              <Nav.Item>
-                <Nav.Link eventKey="posts">Posts</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="members">Members</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="about">About</Nav.Link>
-              </Nav.Item>
+              <Nav.Item><Nav.Link eventKey="posts">Posts</Nav.Link></Nav.Item>
+              <Nav.Item><Nav.Link eventKey="members">Members</Nav.Link></Nav.Item>
+              <Nav.Item><Nav.Link eventKey="about">About</Nav.Link></Nav.Item>
             </Nav>
           </Card.Header>
           
@@ -345,11 +471,12 @@ const GroupDetail = () => {
             <Tab.Content>
               {/* Posts Tab */}
               <Tab.Pane eventKey="posts">
+                {/* New Post Form for Members */}
                 {isMember && (
                   <Card className="mb-4">
                     <Card.Body>
                       <h5 className="mb-3">Create a Post</h5>
-                      <Form onSubmit={handleNewPostSubmit}>
+                      <Form onSubmit={handleSubmitPost}>
                         <Form.Group className="mb-3">
                           <Form.Control
                             as="textarea"
@@ -357,7 +484,7 @@ const GroupDetail = () => {
                             placeholder="Share something with the group..."
                             name="content"
                             value={newPost.content}
-                            onChange={handleNewPostChange}
+                            onChange={handlePostInputChange}
                             required
                           />
                         </Form.Group>
@@ -370,7 +497,7 @@ const GroupDetail = () => {
                                 placeholder="Media URL (optional)"
                                 name="mediaUrl"
                                 value={newPost.mediaUrl}
-                                onChange={handleNewPostChange}
+                                onChange={handlePostInputChange}
                               />
                             </Form.Group>
                           </Col>
@@ -379,7 +506,7 @@ const GroupDetail = () => {
                               <Form.Select
                                 name="mediaType"
                                 value={newPost.mediaType}
-                                onChange={handleNewPostChange}
+                                onChange={handlePostInputChange}
                               >
                                 <option value="">Media type...</option>
                                 <option value="image/jpeg">Image</option>
@@ -393,9 +520,11 @@ const GroupDetail = () => {
                           <Button 
                             type="submit" 
                             variant="primary"
-                            disabled={submitting || !newPost.content}
+                            disabled={isActionLoading.post || !newPost.content}
                           >
-                            {submitting ? 'Posting...' : 'Post'}
+                            {isActionLoading.post ? (
+                              <><Spinner as="span" animation="border" size="sm" className="me-2" /> Posting...</>
+                            ) : 'Post'}
                           </Button>
                         </div>
                       </Form>
@@ -403,101 +532,123 @@ const GroupDetail = () => {
                   </Card>
                 )}
                 
+                {/* Post List */}
                 {posts.length === 0 ? (
                   <div className="text-center py-5">
                     <p className="text-muted">No posts in this group yet</p>
-                    {isMember && (
-                      <p>Be the first to share something!</p>
-                    )}
+                    {isMember && <p>Be the first to share something!</p>}
                   </div>
                 ) : (
                   <div>
-                    {posts.map(post => (
-                      <Card key={post.id} className="mb-3">
-                        <Card.Body>
-                          <div className="d-flex justify-content-between mb-3">
-                            <div className="d-flex">
-                              <FaUserCircle size={40} className="text-secondary me-2" />
-                              <div>
-                                <h6 className="mb-0">{users[post.userId]?.username || 'Unknown User'}</h6>
-                                <small className="text-muted">
-                                  {new Date(post.timestamp).toLocaleString()}
-                                </small>
+                    {posts.map(post => {
+                      const isPostDeleting = isActionLoading[`delete_post_${post.id}`];
+                      return (
+                        <Card key={post.id} className="mb-3">
+                          <Card.Body>
+                            {/* Post Header */}
+                            <div className="d-flex justify-content-between mb-3">
+                              <div className="d-flex">
+                                <FaUserCircle size={40} className="text-secondary me-2" />
+                                <div>
+                                  <h6 className="mb-0">{users[post.userId]?.username || 'Unknown User'}</h6>
+                                  <small className="text-muted">
+                                    {new Date(post.timestamp).toLocaleString()}
+                                  </small>
+                                </div>
                               </div>
+                              
+                              {/* Delete Post Button */}
+                              {(post.userId === currentUser.id || isAdmin || isCreator) && (
+                                <Button 
+                                  variant="link" 
+                                  className="text-danger p-0" 
+                                  onClick={() => handleDeletePost(post.id)}
+                                  disabled={isPostDeleting}
+                                >
+                                  {isPostDeleting ? (
+                                    <Spinner as="span" animation="border" size="sm" />
+                                  ) : (
+                                    <FaTrash />
+                                  )}
+                                </Button>
+                              )}
                             </div>
                             
-                            {(post.userId === currentUser.id || isAdmin || isCreator) && (
-                              <Button 
-                                variant="link" 
-                                className="text-danger p-0" 
-                                onClick={() => handleDeletePost(post.id)}
-                              >
-                                <FaTrash />
-                              </Button>
+                            {/* Post Content */}
+                            <p>{post.content}</p>
+                            
+                            {/* Post Media */}
+                            {post.mediaUrl && post.mediaType?.startsWith('image') && (
+                              <img 
+                                src={post.mediaUrl} 
+                                alt="Post media" 
+                                className="img-fluid rounded mb-3" 
+                              />
                             )}
-                          </div>
-                          
-                          <p>{post.content}</p>
-                          
-                          {post.mediaUrl && post.mediaType?.startsWith('image') && (
-                            <img 
-                              src={post.mediaUrl} 
-                              alt="Post media" 
-                              className="img-fluid rounded mb-3" 
-                            />
-                          )}
-                          
-                          {post.mediaUrl && post.mediaType?.startsWith('video') && (
-                            <video 
-                              src={post.mediaUrl} 
-                              controls 
-                              className="w-100 rounded mb-3" 
-                            />
-                          )}
-                        </Card.Body>
-                      </Card>
-                    ))}
+                            
+                            {post.mediaUrl && post.mediaType?.startsWith('video') && (
+                              <video 
+                                src={post.mediaUrl} 
+                                controls 
+                                className="w-100 rounded mb-3" 
+                              />
+                            )}
+                          </Card.Body>
+                        </Card>
+                      );
+                    })}
                   </div>
                 )}
               </Tab.Pane>
               
               {/* Members Tab */}
               <Tab.Pane eventKey="members">
-                <div className="d-flex justify-content-between mb-4">
-                  <h4>Members ({group.memberIds?.length || 0})</h4>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <h4 className="mb-0">Members ({group.memberIds?.length || 0})</h4>
                   <Button 
                     variant="outline-primary" 
-                    size="sm"
                     onClick={() => setShowMembersModal(true)}
                   >
-                    <FaUsers className="me-2" /> View All
+                    <FaUsers className="me-2" /> View All Members
                   </Button>
                 </div>
                 
-                <Row>
-                  {group.memberIds?.slice(0, 8).map(memberId => (
-                    <Col md={3} sm={6} className="mb-4" key={memberId}>
-                      <Card className="text-center p-3">
-                        <FaUserCircle size={60} className="mx-auto text-secondary mb-2" />
-                        <h6>{users[memberId]?.username || 'Unknown User'}</h6>
-                        {memberId === group.creatorId && (
-                          <Badge bg="primary" className="mx-auto">Creator</Badge>
-                        )}
-                        {group.adminIds?.includes(memberId) && memberId !== group.creatorId && (
-                          <Badge bg="info" className="mx-auto">Admin</Badge>
-                        )}
-                      </Card>
+                <Row className="g-3">
+                  {group.memberIds?.length === 0 ? (
+                    <Col xs={12}>
+                      <div className="text-center py-4">
+                        <p className="text-muted">This group has no members yet.</p>
+                      </div>
                     </Col>
-                  ))}
+                  ) : (
+                    group.memberIds?.slice(0, 8).map(memberId => (
+                      <Col lg={3} md={4} sm={6} xs={12} key={memberId}>
+                        <Card className="h-100 text-center p-3">
+                          <FaUserCircle size={50} className="mx-auto text-secondary mb-2" />
+                          <h6 className="text-truncate" style={{ maxWidth: '90%', margin: '0 auto' }}>
+                            {users[memberId]?.username || 'Unknown User'}
+                          </h6>
+                          <div className="mt-2">
+                            {memberId === group.creatorId && (
+                              <Badge bg="primary" className="mx-auto">Creator</Badge>
+                            )}
+                            {group.adminIds?.includes(memberId) && memberId !== group.creatorId && (
+                              <Badge bg="info" className="mx-auto">Admin</Badge>
+                            )}
+                          </div>
+                        </Card>
+                      </Col>
+                    ))
+                  )}
                 </Row>
                 
                 {group.memberIds?.length > 8 && (
-                  <div className="text-center mt-3">
+                  <div className="text-center mt-4">
                     <Button 
                       variant="outline-secondary"
                       onClick={() => setShowMembersModal(true)}
                     >
-                      View All Members
+                      View All {group.memberIds.length} Members
                     </Button>
                   </div>
                 )}
@@ -510,8 +661,7 @@ const GroupDetail = () => {
                   <ul className="list-group mb-4">
                     {group.rules.map((rule, index) => (
                       <li key={index} className="list-group-item">
-                        <FaInfoCircle className="text-primary me-2" />
-                        {rule}
+                        <FaInfoCircle className="text-primary me-2" />{rule}
                       </li>
                     ))}
                   </ul>
@@ -519,7 +669,7 @@ const GroupDetail = () => {
                   <p className="text-muted">No specific rules have been set for this group.</p>
                 )}
                 
-                <h4 className="mb-3">About This Group</h4>
+                <h4 className="mb-3">About Group</h4>
                 <Card className="mb-4">
                   <Card.Body>
                     <Row>
@@ -540,52 +690,111 @@ const GroupDetail = () => {
         </Card>
       </Tab.Container>
       
-      {/* Members Modal */}
+   
       <Modal 
         show={showMembersModal} 
         onHide={() => setShowMembersModal(false)}
         size="lg"
+        centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Group Members</Modal.Title>
+          <Modal.Title>
+            Group Members ({group.memberIds?.length || 0})
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <Row>
-            {group.memberIds?.map(memberId => (
-              <Col md={4} sm={6} className="mb-4" key={memberId}>
-                <Card className="text-center p-3">
-                  <FaUserCircle size={60} className="mx-auto text-secondary mb-2" />
-                  <h6>{users[memberId]?.username || 'Unknown User'}</h6>
-                  <div>
-                    {memberId === group.creatorId && (
-                      <Badge bg="primary" className="mx-1">Creator</Badge>
-                    )}
-                    {group.adminIds?.includes(memberId) && memberId !== group.creatorId && (
-                      <Badge bg="info" className="mx-1">Admin</Badge>
-                    )}
-                  </div>
-                  
-                  {isCreator && memberId !== currentUser.id && (
-                    <div className="mt-2">
-                      <Button 
-                        variant="outline-danger" 
-                        size="sm"
-                        onClick={() => {
-                          // Handle remove member logic
-                          if (window.confirm(`Remove ${users[memberId]?.username || 'this user'} from the group?`)) {
-                            // Implementation goes here
-                          }
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  )}
-                </Card>
-              </Col>
-            ))}
-          </Row>
+        <Modal.Body className="py-4">
+          {group.memberIds?.length === 0 ? (
+            <div className="text-center py-4">
+              <p className="text-muted">This group has no members yet.</p>
+            </div>
+          ) : (
+            <Row className="g-3">
+              {group.memberIds?.map(memberId => {
+                const isRemoving = isActionLoading[`remove_${memberId}`];
+                const isMakingAdmin = isActionLoading[`make_admin_${memberId}`];
+                const isRemovingAdmin = isActionLoading[`remove_admin_${memberId}`];
+                
+                return (
+                  <Col lg={4} md={6} sm={12} key={memberId}>
+                    <Card className="h-100">
+                      <Card.Body className="d-flex flex-column align-items-center p-3">
+                        <div className="d-flex align-items-center w-100 mb-2">
+                          <FaUserCircle size={50} className="text-secondary me-3" />
+                          <div className="flex-grow-1">
+                            <h6 className="mb-0 text-truncate" style={{ maxWidth: '150px' }}>
+                              {users[memberId]?.username || 'Unknown User'}
+                            </h6>
+                            <div className="mt-1">
+                              {memberId === group.creatorId && (
+                                <Badge bg="primary" className="me-1">Creator</Badge>
+                              )}
+                              {group.adminIds?.includes(memberId) && memberId !== group.creatorId && (
+                                <Badge bg="info" className="me-1">Admin</Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Admin Actions */}
+                        {isCreator && memberId !== currentUser.id && (
+                          <div className="mt-2 d-flex w-100 justify-content-end">
+                            {group.adminIds?.includes(memberId) && memberId !== group.creatorId ? (
+                              <Button 
+                                variant="outline-secondary" 
+                                size="sm"
+                                className="me-2"
+                                onClick={() => {
+                                  if (window.confirm(`Remove admin status from ${users[memberId]?.username || 'this user'}?`)) {
+                                    handleToggleAdmin(memberId, false);
+                                  }
+                                }}
+                                disabled={isRemovingAdmin}
+                              >
+                                {isRemovingAdmin ? 'Updating...' : 'Remove Admin'}
+                              </Button>
+                            ) : memberId !== group.creatorId && (
+                              <Button 
+                                variant="outline-primary" 
+                                size="sm"
+                                className="me-2"
+                                onClick={() => {
+                                  if (window.confirm(`Make ${users[memberId]?.username || 'this user'} an admin?`)) {
+                                    handleToggleAdmin(memberId, true);
+                                  }
+                                }}
+                                disabled={isMakingAdmin}
+                              >
+                                {isMakingAdmin ? 'Updating...' : 'Make'}
+                              </Button>
+                            )}
+                            
+                            <Button 
+                              variant="outline-danger" 
+                              size="sm"
+                              onClick={() => {
+                                if (window.confirm(`Remove ${users[memberId]?.username || 'this user'} from the group?`)) {
+                                  handleRemoveMember(memberId);
+                                }
+                              }}
+                              disabled={isRemoving}
+                            >
+                              {isRemoving ? 'Removing...' : 'Remove'}
+                            </Button>
+                          </div>
+                        )}
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                );
+              })}
+            </Row>
+          )}
         </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowMembersModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
       </Modal>
     </Container>
   );

@@ -9,6 +9,7 @@ import MediaUpload from '../components/MediaUpload';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+
 // Replace date-fns with a simple function
 const formatTimeAgo = (dateString) => {
   if (!dateString) return 'Recently';
@@ -26,6 +27,44 @@ const formatTimeAgo = (dateString) => {
   if (months < 12) return `${months} month${months > 1 ? 's' : ''} ago`;
   const years = Math.floor(months / 12);
   return `${years} year${years > 1 ? 's' : ''} ago`;
+};
+
+const LoadingSkeletons = () => {
+  return (
+      <>
+        {[1, 2, 3].map(i => (
+            <Card key={i} className="custom-card mb-4">
+              <Card.Header className="bg-white">
+                <div className="d-flex align-items-center">
+                  <div className="bg-secondary opacity-25 rounded-circle me-2" style={{width: 40, height: 40}}></div>
+                  <div className="flex-grow-1">
+                    <div className="bg-secondary opacity-25" style={{width: '60%', height: 16, borderRadius: 4}}></div>
+                    <div className="bg-secondary opacity-25 mt-1" style={{width: '30%', height: 12, borderRadius: 4}}></div>
+                  </div>
+                </div>
+              </Card.Header>
+              <Card.Body>
+                <div className="bg-secondary opacity-25 mb-3" style={{width: '40%', height: 24, borderRadius: 4}}></div>
+                {/* Added badges skeletons */}
+                <div className="d-flex mb-3">
+                  <div className="bg-secondary opacity-25 me-2" style={{width: '10%', height: 20, borderRadius: 16}}></div>
+                  <div className="bg-secondary opacity-25 me-2" style={{width: '15%', height: 20, borderRadius: 16}}></div>
+                  <div className="bg-secondary opacity-25" style={{width: '20%', height: 20, borderRadius: 16}}></div>
+                </div>
+                <div className="bg-secondary opacity-25 mb-3" style={{width: '100%', height: 200, borderRadius: 4}}></div>
+                <div className="bg-secondary opacity-25 mb-2" style={{width: '100%', height: 16, borderRadius: 4}}></div>
+                <div className="bg-secondary opacity-25" style={{width: '80%', height: 16, borderRadius: 4}}></div>
+                {/* Added interaction buttons skeleton */}
+                <div className="d-flex mt-3">
+                  <div className="bg-secondary opacity-25 me-3" style={{width: '8%', height: 20, borderRadius: 4}}></div>
+                  <div className="bg-secondary opacity-25 me-3" style={{width: '8%', height: 20, borderRadius: 4}}></div>
+                  <div className="bg-secondary opacity-25" style={{width: '10%', height: 20, borderRadius: 4}}></div>
+                </div>
+              </Card.Body>
+            </Card>
+        ))}
+      </>
+  );
 };
 
 const Feed = () => {
@@ -46,8 +85,28 @@ const Feed = () => {
   // Add state to track bookmarked posts
   const [bookmarkedPosts, setBookmarkedPosts] = useState({});
 
+
   useEffect(() => {
     fetchPosts();
+
+    // Add CSS for comment highlight animation
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .comment-highlight {
+        animation: highlightComment 3s ease;
+      }
+      
+      @keyframes highlightComment {
+        0% { background-color: rgba(255, 255, 0, 0.3); }
+        100% { background-color: transparent; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Clean up style on unmount
+    return () => {
+      document.head.removeChild(style);
+    };
   }, []);
 
   // Add useEffect to load user's bookmarks when component mounts
@@ -141,6 +200,26 @@ const Feed = () => {
     setUsers(usersObject);
   };
 
+  // Function to handle post view and track comment counts
+  const handlePostView = (postId) => {
+    const currentCommentCount = (comments[postId] || []).length;
+    
+    // Update unread count
+    const lastCount = lastViewedCommentCounts[postId] || 0;
+    const unreadCount = Math.max(0, currentCommentCount - lastCount);
+    
+    setUnreadCommentCounts(prev => ({
+      ...prev,
+      [postId]: unreadCount
+    }));
+    
+    // Update last viewed count
+    setLastViewedCommentCounts(prev => ({
+      ...prev,
+      [postId]: currentCommentCount
+    }));
+  };
+
   const handleNewPostChange = (e) => {
     const { name, value } = e.target;
     setNewPost(prev => ({
@@ -230,14 +309,42 @@ const Feed = () => {
         [postId]: [...(prev[postId] || []), createdComment]
       }));
       
+      // Mark comment as newly added
+      setNewlyAddedComments(prev => ({
+        ...prev,
+        [createdComment.id]: true
+      }));
+      
+      // Remove the highlight after 3 seconds
+      setTimeout(() => {
+        setNewlyAddedComments(prev => {
+          const updated = {...prev};
+          delete updated[createdComment.id];
+          return updated;
+        });
+      }, 3000);
+      
       // Clear the comment input
       setNewComment(prev => ({
         ...prev,
         [postId]: ''
       }));
+      
+      // Add toast notification
+      toast.success('Comment posted successfully!');
+      
+      // Update unread comment counts for other users
+      const updatedCount = (comments[postId] || []).length + 1;
+      if (lastViewedCommentCounts[postId] !== undefined) {
+        setUnreadCommentCounts(prev => ({
+          ...prev,
+          [postId]: Math.max(0, updatedCount - lastViewedCommentCounts[postId])
+        }));
+      }
+      
     } catch (err) {
       console.error('Error creating comment:', err);
-      alert('Failed to post comment. Please try again.');
+      toast.error('Failed to post comment. Please try again.');
     } finally {
       setSubmittingComment(false);
     }
@@ -256,9 +363,13 @@ const Feed = () => {
         ...prev,
         [postId]: prev[postId].filter(comment => comment.id !== commentId)
       }));
+      
+      // Add toast notification
+      toast.success('Comment deleted successfully!');
+      
     } catch (err) {
       console.error('Error deleting comment:', err);
-      alert('Failed to delete comment. Please try again.');
+      toast.error('Failed to delete comment. Please try again.');
     }
   };
 
@@ -283,6 +394,12 @@ const Feed = () => {
       
       await commentService.updateComment(editingComment.id, commentData, currentUser.id);
       
+      // Mark comment as edited
+      setEditedComments(prev => ({
+        ...prev,
+        [editingComment.id]: true
+      }));
+      
       // Update comments state
       setComments(prev => ({
         ...prev,
@@ -294,9 +411,13 @@ const Feed = () => {
       }));
       
       setEditingComment({ id: null, text: '' });
+      
+      // Add toast notification
+      toast.success('Comment updated successfully!');
+      
     } catch (err) {
       console.error('Error updating comment:', err);
-      alert('Failed to update comment. Please try again.');
+      toast.error('Failed to update comment. Please try again.');
     }
   };
 
@@ -312,8 +433,10 @@ const Feed = () => {
           ...prev,
           [postId]: prev[postId].filter(like => like.id !== userLike.id)
         }));
+        toast.info('Post unliked');
       } catch (err) {
         console.error('Error removing like:', err);
+        toast.error('Failed to unlike the post. Please try again.');
       }
     } else {
       // User hasn't liked the post, so like it
@@ -329,8 +452,10 @@ const Feed = () => {
           ...prev,
           [postId]: [...(prev[postId] || []), createdLike]
         }));
+        toast.success('Post liked!');
       } catch (err) {
         console.error('Error adding like:', err);
+        toast.error('Failed to like the post. Please try again.');
       }
     }
   };
@@ -488,14 +613,26 @@ const Feed = () => {
 
   if (loading) {
     return (
-      <Container className="py-5 text-center">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-        <p className="mt-2">Loading posts...</p>
-      </Container>
+        <Container className="py-4">
+          <Row>
+            <Col lg={8} className="mx-auto">
+              <LoadingSkeletons />
+            </Col>
+          </Row>
+        </Container>
     );
   }
+
+  const getFilteredPosts = () => {
+    if (!searchTerm.trim()) return posts;
+
+    return posts.filter(post =>
+        post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.contentDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.cuisineType?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+
 
   if (error) {
     return (
@@ -629,12 +766,76 @@ const Feed = () => {
                     variant="primary"
                     disabled={submittingPost || !newPost.title || !newPost.contentDescription}
                   >
-                    {submittingPost ? 'Posting...' : 'Share Recipe'}
+                    {/*{submittingPost ? 'Posting...' : 'Share Recipe'}*/}
+
+                    {/* WITH THIS */}
+                    {submittingPost ? (
+                        <>
+                          <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-1" />
+                          Posting...
+                        </>
+                    ) : (
+                        'Share Recipe'
+                    )}
+
                   </Button>
                 </div>
               </Form>
             </Card.Body>
           </Card>
+
+          {/* ADD SEARCH INPUT HERE - right after the post creation card and before posts display */}
+          <div className="mb-4 position-relative">
+            <Form.Control
+                type="text"
+                placeholder="Search recipes by title, description or cuisine..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+            />
+            {searchTerm && (
+                <Button
+                    variant="link"
+                    className="position-absolute top-50 end-0 translate-middle-y border-0"
+                    onClick={() => setSearchTerm('')}
+                >
+                  ✕
+                </Button>
+            )}
+          </div>
+
+          {/* Add this before mapping through posts */}
+          {getFilteredPosts().length === 0 && searchTerm && (
+              <div className="text-center py-5">
+                <h4>No recipes found matching "{searchTerm}"</h4>
+                <p className="text-muted">Try different keywords or clear the search</p>
+              </div>
+          )}
+
+          {searchTerm && (
+              <p className="text-muted mb-3">
+                Found {getFilteredPosts().length} {getFilteredPosts().length === 1 ? 'recipe' : 'recipes'}
+              </p>
+          )}
+
+          {/* ADD THIS REFRESH BUTTON */}
+          <div className="d-flex justify-content-end mb-3">
+            <Button
+                variant="outline-primary"
+                onClick={fetchPosts}
+                disabled={loading}
+                className="refresh-btn"
+                title="Refresh posts feed"
+            >
+              {loading ? (
+                  <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+              ) : (
+                  <span>↻ Refresh Feed</span>
+              )}
+            </Button>
+          </div>
+
+
           {/* Posts Feed */}
           {posts.length === 0 ? (
             <div className="text-center py-5">
@@ -643,7 +844,11 @@ const Feed = () => {
             </div>
           ) : (
             posts.map(post => (
-              <Card key={post.id} className="custom-card mb-4">
+              <Card 
+                key={post.id} 
+                className="custom-card mb-4"
+                onClick={() => handlePostView(post.id)}
+              >
                 {/* Post Header */}
                 <Card.Header className="bg-white d-flex align-items-center">
                   {users[post.userId]?.profileImage ? (
@@ -705,7 +910,10 @@ const Feed = () => {
                     <Button
                       variant="link"
                       className={`text-decoration-none ${isPostLikedByUser(post.id) ? 'text-danger' : 'text-muted'}`}
-                      onClick={() => handleLikeToggle(post.id)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering Card's onClick
+                        handleLikeToggle(post.id);
+                      }}
                     >
                       {isPostLikedByUser(post.id) ? (
                         <FaHeart className="me-1" />
@@ -717,14 +925,23 @@ const Feed = () => {
                     <Button
                       variant="link"
                       className="text-decoration-none text-muted ms-3"
+                      onClick={(e) => e.stopPropagation()} // Prevent triggering Card's onClick
                     >
                       <FaComment className="me-1" />
                       {(comments[post.id] || []).length}
+                      {unreadCommentCounts[post.id] > 0 && (
+                        <Badge pill bg="danger" className="ms-1">
+                          {unreadCommentCounts[post.id]}
+                        </Badge>
+                      )}
                     </Button>
                     <Button
                       variant="link"
                       className={`text-decoration-none ${bookmarkedPosts[post.id] ? 'text-primary' : 'text-muted'} ms-3`}
-                      onClick={() => handleBookmarkToggle(post)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering Card's onClick
+                        handleBookmarkToggle(post);
+                      }}
                     >
                       {bookmarkedPosts[post.id] ? (
                         <FaBookmark className="me-1" />
@@ -736,19 +953,22 @@ const Feed = () => {
                   </div>
                 </Card.Body>
                 {/* Comments Section */}
-                <Card.Footer className="bg-white">
+                <Card.Footer className="bg-white" onClick={(e) => e.stopPropagation()}>
                   {/* Comment List */}
                   {comments[post.id] && comments[post.id].length > 0 && (
                     <div className="mb-3">
                       {comments[post.id].map(comment => (
-                        <div key={comment.id} className="d-flex mb-2">
+                        <div 
+                          key={comment.id} 
+                          className={`d-flex mb-2 ${newlyAddedComments[comment.id] ? 'comment-highlight' : ''}`}
+                        >
                           <FaUserCircle size={30} className="text-secondary me-2 mt-1" />
                           <div className="bg-light p-2 rounded flex-grow-1">
                             <div className="d-flex justify-content-between">
                               <strong>{users[comment.userId]?.username || 'Unknown User'}</strong>
                               <div>
                                 <small className="text-muted me-2">
-                                  {formatTimeAgo(comment.timestamp)}
+                                  {formatTimeAgo(comment.timestamp)} {editedComments[comment.id] && "(Edited)"}
                                 </small>
                                 {/* Show edit button only to comment author */}
                                 {comment.userId === currentUser.id && (
@@ -781,12 +1001,13 @@ const Feed = () => {
                   {/* Add Comment Form */}
                   <div className="d-flex">
                     <FaUserCircle size={30} className="text-secondary me-2 mt-1" />
-                    <Form className="flex-grow-1 d-flex">
+                    <Form className="flex-grow-1 d-flex flex-column">
                       <Form.Control
                         type="text"
                         placeholder="Write a comment..."
                         value={newComment[post.id] || ''}
-                        onChange={(e) => handleNewCommentChange(post.id, e.target.value)}
+                        onChange={(e) => handleNewCommentChange(post.id, e.target.value.slice(0, 250))}
+                        maxLength={250}
                         onKeyPress={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
@@ -794,9 +1015,14 @@ const Feed = () => {
                           }
                         }}
                       />
+                      {newComment[post.id] && (
+                        <small className="text-muted mt-1">
+                          {250 - (newComment[post.id]?.length || 0)} characters remaining
+                        </small>
+                      )}
                       <Button
                         variant="primary"
-                        className="ms-2"
+                        className="mt-2 align-self-end"
                         disabled={submittingComment || !newComment[post.id]}
                         onClick={() => handleNewCommentSubmit(post.id)}
                       >
@@ -842,6 +1068,7 @@ const Feed = () => {
       <ToastContainer position="bottom-right" autoClose={3000} />
     </Container>
   );
+  
 };
 
 export default Feed;
