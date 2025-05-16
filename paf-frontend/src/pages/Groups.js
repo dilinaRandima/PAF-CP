@@ -100,16 +100,19 @@ const Groups = () => {
         </Button>
       </div>
       
+      
       {error && <Alert variant="danger">{error}</Alert>}
       
       <div className="mb-4 position-relative">
-        <FaSearch className="position-absolute" style={{ left: '15px', top: '12px', color: '#aaa' }} />
+        <FaSearch id="search-icon" className="position-absolute" style={{ left: '15px', top: '12px', color: '#aaa' }} />
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Search groups..."
           className="form-control ps-5"
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
+          aria-label="Search groups"
+          aria-labelledby="search-icon"
         />
       </div>
       
