@@ -825,6 +825,7 @@ const Feed = () => {
                 onClick={fetchPosts}
                 disabled={loading}
                 className="refresh-btn"
+                title="Refresh posts feed"
             >
               {loading ? (
                   <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
