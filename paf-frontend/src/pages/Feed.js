@@ -754,7 +754,7 @@ const Feed = () => {
                     variant="primary"
                     disabled={submittingPost || !newPost.title || !newPost.contentDescription}
                   >
-                    {submittingPost ? 'Posting...' : 'Share Recipe'}
+                    {/*{submittingPost ? 'Posting...' : 'Share Recipe'}*/}
 
                     {/* WITH THIS */}
                     {submittingPost ? (
@@ -1032,6 +1032,7 @@ const Feed = () => {
       <ToastContainer position="bottom-right" autoClose={3000} />
     </Container>
   );
+  
 };
 
 export default Feed;
