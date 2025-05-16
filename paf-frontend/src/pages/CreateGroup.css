@@ -80,7 +80,7 @@
     50% { background-position: 100% 50%; }
   }
   
-  /* Group image upload */
+  /* Group image upload with pulse animation */
   .group-image-upload {
     position: relative;
     margin-bottom: 30px;
@@ -214,5 +214,4 @@
   .submit-group-btn:hover {
     transform: scale(1.05);
     box-shadow: 0 10px 30px rgba(46, 204, 113, 0.4);
-  }
-  
+  };
