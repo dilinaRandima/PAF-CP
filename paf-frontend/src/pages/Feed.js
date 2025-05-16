@@ -45,9 +45,21 @@ const LoadingSkeletons = () => {
               </Card.Header>
               <Card.Body>
                 <div className="bg-secondary opacity-25 mb-3" style={{width: '40%', height: 24, borderRadius: 4}}></div>
+                {/* Added badges skeletons */}
+                <div className="d-flex mb-3">
+                  <div className="bg-secondary opacity-25 me-2" style={{width: '10%', height: 20, borderRadius: 16}}></div>
+                  <div className="bg-secondary opacity-25 me-2" style={{width: '15%', height: 20, borderRadius: 16}}></div>
+                  <div className="bg-secondary opacity-25" style={{width: '20%', height: 20, borderRadius: 16}}></div>
+                </div>
                 <div className="bg-secondary opacity-25 mb-3" style={{width: '100%', height: 200, borderRadius: 4}}></div>
                 <div className="bg-secondary opacity-25 mb-2" style={{width: '100%', height: 16, borderRadius: 4}}></div>
                 <div className="bg-secondary opacity-25" style={{width: '80%', height: 16, borderRadius: 4}}></div>
+                {/* Added interaction buttons skeleton */}
+                <div className="d-flex mt-3">
+                  <div className="bg-secondary opacity-25 me-3" style={{width: '8%', height: 20, borderRadius: 4}}></div>
+                  <div className="bg-secondary opacity-25 me-3" style={{width: '8%', height: 20, borderRadius: 4}}></div>
+                  <div className="bg-secondary opacity-25" style={{width: '10%', height: 20, borderRadius: 4}}></div>
+                </div>
               </Card.Body>
             </Card>
         ))}
@@ -773,7 +785,7 @@ const Feed = () => {
           </Card>
 
           {/* ADD SEARCH INPUT HERE - right after the post creation card and before posts display */}
-          <div className="mb-4">
+          <div className="mb-4 position-relative">
             <Form.Control
                 type="text"
                 placeholder="Search recipes by title, description or cuisine..."
@@ -781,6 +793,15 @@ const Feed = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
             />
+            {searchTerm && (
+                <Button
+                    variant="link"
+                    className="position-absolute top-50 end-0 translate-middle-y border-0"
+                    onClick={() => setSearchTerm('')}
+                >
+                  ✕
+                </Button>
+            )}
           </div>
 
           {/* ADD THIS REFRESH BUTTON */}
