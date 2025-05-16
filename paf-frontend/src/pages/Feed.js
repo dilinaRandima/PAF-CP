@@ -109,7 +109,7 @@ const Feed = () => {
     };
   }, []);
 
-  // Add useEffect to load user's bookmarks when component mounts
+  // Add load bookmarks on mount
   useEffect(() => {
     const fetchUserBookmarks = async () => {
       try {
@@ -138,7 +138,7 @@ const Feed = () => {
       // Sort posts by timestamp (newest first)
       fetchedPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       setPosts(fetchedPosts);
-      // Fetch comments, likes, and user data for each post
+      // Fetch all associated data (comments, likes, users) for each post
       await Promise.all([
         fetchCommentsForPosts(fetchedPosts),
         fetchLikesForPosts(fetchedPosts),
@@ -1067,8 +1067,10 @@ const Feed = () => {
       {/* Toast Container for notifications */}
       <ToastContainer position="bottom-right" autoClose={3000} />
     </Container>
+
   );
   
 };
+
 
 export default Feed;
