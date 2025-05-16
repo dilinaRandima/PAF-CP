@@ -13,14 +13,14 @@
   background-color: #f5f7fa;
 }
 
-/* Header Styles */
+/* Header styles*/
 .header {
   background-color: #ffffff;
   border-bottom: 1px solid #e5e5e5;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Navigation Styles */
+/* Navigation styles*/
 .nav-link {
   color: #555;
   font-weight: 500;
@@ -32,7 +32,7 @@
   color: #3897f0;
 }
 
-/* Footer Styles */
+/* Footer styles*/
 .footer {
   padding: 20px 0;
   text-align: center;

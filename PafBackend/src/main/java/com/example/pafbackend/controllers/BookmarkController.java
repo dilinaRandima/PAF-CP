@@ -97,7 +97,7 @@ public class BookmarkController {
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Check if a bookmark exists
+    // Check a bookmark exists
     @GetMapping("/check")
     public ResponseEntity<Boolean> checkBookmarkExists(
             @RequestParam String userId, 

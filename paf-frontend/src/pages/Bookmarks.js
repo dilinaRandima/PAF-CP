@@ -110,10 +110,10 @@ const Bookmarks = () => {
       };
       
       if (editingBookmark) {
-        // Update existing bookmark
+        // Update bookmark
         await bookmarkService.updateBookmark(editingBookmark.id, bookmarkData);
       } else {
-        // Create new bookmark
+        // Create new one
         await bookmarkService.createBookmark(bookmarkData);
       }
       
