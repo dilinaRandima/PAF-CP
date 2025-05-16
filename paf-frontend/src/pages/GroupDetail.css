@@ -68,14 +68,10 @@
   }
   
   .group-detail-name {
-    font-size: 3.5rem;
+    font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 15px;
-    font-family: 'Playfair Display', serif;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     font-family: 'Merriweather', 'Georgia', serif;
-    font-size: 2.5rem;
-    color: var(--primary-color);
     background: linear-gradient(45deg, #e67e22, #2ecc71, #3498db);
     -webkit-background-clip: text;
     background-clip: text;
