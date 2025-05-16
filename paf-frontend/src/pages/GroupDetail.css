@@ -198,11 +198,11 @@
   }
   
   .member-card {
-    background: white;
+    background: rgb(174, 29, 29);
     border-radius: 15px;
     padding: 25px;
     text-align: center;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px rgba(16, 3, 3, 0.1);
     transition: all 0.3s ease;
     animation: memberReveal 0.5s ease;
     animation-fill-mode: backwards;
@@ -225,7 +225,7 @@
   
   .member-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 25px rgba(23, 16, 16, 0.15);
   }
   
   .member-avatar {
@@ -234,7 +234,7 @@
     border-radius: 50%;
     object-fit: cover;
     margin: 0 auto 15px;
-    border: 3px solid #e67e22;
+    border: 3px solid #905725;
     transition: all 0.3s ease;
   }
   
