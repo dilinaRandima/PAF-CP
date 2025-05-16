@@ -804,6 +804,20 @@ const Feed = () => {
             )}
           </div>
 
+          {/* Add this before mapping through posts */}
+          {getFilteredPosts().length === 0 && searchTerm && (
+              <div className="text-center py-5">
+                <h4>No recipes found matching "{searchTerm}"</h4>
+                <p className="text-muted">Try different keywords or clear the search</p>
+              </div>
+          )}
+
+          {searchTerm && (
+              <p className="text-muted mb-3">
+                Found {getFilteredPosts().length} {getFilteredPosts().length === 1 ? 'recipe' : 'recipes'}
+              </p>
+          )}
+
           {/* ADD THIS REFRESH BUTTON */}
           <div className="d-flex justify-content-end mb-3">
             <Button
