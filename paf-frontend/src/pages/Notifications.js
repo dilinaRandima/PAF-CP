@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, Button, Spinner, Alert, Badge } from 'react-
 import { AuthContext } from '../context/AuthContext';
 import { notificationService, userService } from '../api/apiService';
 import { FaBell, FaCheck, FaTrash, FaHeart, FaComment, FaUsers } from 'react-icons/fa';
-
+import '../styles/Notifications.css';
 const Notifications = () => {
   const { currentUser } = useContext(AuthContext);
   const [notifications, setNotifications] = useState([]);
@@ -13,30 +13,32 @@ const Notifications = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (currentUser) {
-      fetchNotifications();
-    }
-  }, [currentUser]);
+  if (currentUser) {
+    fetchNotifications();
+  }
+}, [currentUser]);
 
-  const fetchNotifications = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await notificationService.getUserNotifications(currentUser.id);
-      setNotifications(response.data);
-      
-      // Get unique user IDs from notifications
-      const userIds = [...new Set(response.data.map(notif => notif.actionUserId).filter(Boolean))];
-      await fetchUsers(userIds);
-      
-    } catch (err) {
-      console.error('Error fetching notifications:', err);
-      setError('Failed to load notifications. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
+// fetchNotifications function
+
+
+const fetchNotifications = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    
+    const response = await notificationService.getUserNotifications(currentUser.id);
+    setNotifications(response.data);
+    
+    const userIds = [...new Set(response.data.map(notif => notif.actionUserId).filter(Boolean))];
+    await fetchUsers(userIds);
+    
+  } catch (err) {
+    console.error('Error fetching notifications:', err);
+    setError('Failed to load notifications. Please try again later.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchUsers = async (userIds) => {
     const usersObject = { ...users };
@@ -57,19 +59,19 @@ const Notifications = () => {
   };
 
   const handleMarkAsRead = async (notificationId) => {
-    try {
-      await notificationService.markAsRead(notificationId);
-      
-      // Update local state
-      setNotifications(prev => prev.map(notif => 
-        notif.id === notificationId 
-          ? { ...notif, read: true } 
-          : notif
-      ));
-    } catch (err) {
-      console.error('Error marking notification as read:', err);
-    }
-  };
+  try {
+    await notificationService.markAsRead(notificationId);
+    setNotifications(prev => prev.map(notif => 
+      notif.id === notificationId 
+        ? { ...notif, read: true } 
+        : notif
+    ));
+  } catch (err) {
+    console.error('Error marking notification as read:', err);
+  }
+};
+
+
 
   const handleMarkAllAsRead = async () => {
     try {
@@ -107,19 +109,7 @@ const Notifications = () => {
     }
   };
 
-  const getNotificationLink = (notification) => {
-    const { sourceType, sourceId } = notification;
-    
-    switch (sourceType) {
-      case 'post':
-        return `/posts/${sourceId}`;
-      case 'group':
-        return `/groups/${sourceId}`;
-      default:
-        return '#';
-    }
-  };
-
+  
   if (loading) {
     return (
       <Container className="py-5 text-center">
@@ -130,6 +120,28 @@ const Notifications = () => {
       </Container>
     );
   }
+  {notifications.some(notif => !notif.read) && (
+  <Button 
+    variant="outline-primary" 
+    onClick={handleMarkAllAsRead}
+  >
+    <FaCheck className="me-2" /> Mark All as Read
+  </Button>
+)}
+
+const getNotificationLink = (notification) => {
+  const { sourceType, sourceId } = notification;
+  
+  switch (sourceType) {
+    case 'post':
+      return `/posts/${sourceId}`;
+    case 'group':
+      return `/groups/${sourceId}`;
+    default:
+      return '#';
+  }
+};
+
 
   return (
     <Container className="py-4">
@@ -137,12 +149,17 @@ const Notifications = () => {
         <h2>Notifications</h2>
         
         {notifications.some(notif => !notif.read) && (
-          <Button 
-            variant="outline-primary" 
-            onClick={handleMarkAllAsRead}
-          >
-            <FaCheck className="me-2" /> Mark All as Read
-          </Button>
+          
+         <Button 
+         
+  variant="link" 
+  className="text-primary p-0 me-3" 
+  onClick={() => handleMarkAsRead(notification.id)}
+  title="Mark as read"
+>
+  <FaCheck />
+</Button>
+
         )}
       </div>
       

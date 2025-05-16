@@ -89,7 +89,7 @@ const Groups = () => {
 
   return (
     <Container className="py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex justify-content-between align-items-center mb-5">
         <h2>Cooking Communities</h2>
         <Button 
           as={Link} 
@@ -106,7 +106,7 @@ const Groups = () => {
         <FaSearch className="position-absolute" style={{ left: '15px', top: '12px', color: '#aaa' }} />
         <input
           type="text"
-          placeholder="Search groups..."
+          placeholder="Search..."
           className="form-control ps-5"
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
@@ -140,7 +140,7 @@ const Groups = () => {
                     </Card.Text>
                     <div className="mb-3">
                       <small className="text-muted">
-                        {group.memberIds?.length || 0} members
+                        {group.memberIds?.length || 0} members count
                       </small>
                     </div>
                     {group.tags && group.tags.length > 0 && (
@@ -176,7 +176,7 @@ const Groups = () => {
           <Card.Body>
             <FaUsers size={50} className="text-muted mb-3" />
             <h4>No Groups Found</h4>
-            <p className="text-muted">Try clearing your search or create your own group!</p>
+            <p className="text-muted">create your own group!</p>
             <Button 
               as={Link} 
               to="/create-group" 
