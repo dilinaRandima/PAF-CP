@@ -160,7 +160,7 @@ const Feed = () => {
       try {
         const response = await commentService.getCommentsByPostId(post.id);
         commentsObject[post.id] = response.data;
-        // Also fetch user data for commenters
+        // Also get commenter details
         const commenterIds = response.data.map(comment => comment.userId);
         await fetchUsers(commenterIds);
       } catch (err) {
@@ -256,7 +256,7 @@ const Feed = () => {
       const response = await postService.createPost(postData);
       const createdPost = response.data;
       
-      // Update posts list with the new post
+      // Update state with the latest post
       setPosts(prev => [createdPost, ...prev]);
       
       // Clear the form
