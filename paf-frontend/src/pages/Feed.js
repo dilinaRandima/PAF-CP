@@ -142,7 +142,7 @@ const Feed = () => {
       try {
         const response = await commentService.getCommentsByPostId(post.id);
         commentsObject[post.id] = response.data;
-        // Also fetch user data for commenters
+        // Also get commenter details
         const commenterIds = response.data.map(comment => comment.userId);
         await fetchUsers(commenterIds);
       } catch (err) {
