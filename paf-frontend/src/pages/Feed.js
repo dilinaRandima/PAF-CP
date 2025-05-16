@@ -670,7 +670,7 @@ const Feed = () => {
                     variant="primary"
                     disabled={submittingPost || !newPost.title || !newPost.contentDescription}
                   >
-                    {submittingPost ? 'Posting...' : 'Share Recipe'}
+                    {/*{submittingPost ? 'Posting...' : 'Share Recipe'}*/}
 
                     {/* WITH THIS */}
                     {submittingPost ? (
