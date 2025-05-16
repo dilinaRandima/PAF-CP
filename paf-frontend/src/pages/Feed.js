@@ -197,7 +197,7 @@ const Feed = () => {
     try {
       setSubmittingPost(true);
       
-      // Create arrays from media items
+      // organize media itemss into arrays
       const mediaLinks = mediaItems.map(item => item.url);
       const mediaTypes = mediaItems.map(item => item.type);
       
@@ -221,7 +221,7 @@ const Feed = () => {
       // Update state with the latest post
       setPosts(prev => [createdPost, ...prev]);
       
-      // Clear the form
+      // Reset the form field
       setNewPost({ 
         title: '', 
         contentDescription: '', 
