@@ -720,6 +720,12 @@ const Feed = () => {
             )}
           </div>
 
+          {searchTerm && (
+              <p className="text-muted mb-3">
+                Found {getFilteredPosts().length} {getFilteredPosts().length === 1 ? 'recipe' : 'recipes'}
+              </p>
+          )}
+
           {/* ADD THIS REFRESH BUTTON */}
           <div className="d-flex justify-content-end mb-3">
             <Button
