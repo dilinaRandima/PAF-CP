@@ -218,7 +218,7 @@ const Feed = () => {
       const response = await postService.createPost(postData);
       const createdPost = response.data;
       
-      // Update posts list with the new post
+      // Update state with the latest post
       setPosts(prev => [createdPost, ...prev]);
       
       // Clear the form
