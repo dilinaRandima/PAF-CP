@@ -143,12 +143,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (username, password) => {
+  const login = async (email, password) => {
     try {
-      console.log("Attempting login for username:", username);
+      console.log("Attempting login for email:", email);
       
       const response = await axios.post('http://localhost:8080/api/auth/login', {
-        username,
+        email,
         password
       });
       
@@ -190,7 +190,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Login error:', error);
       return { 
         success: false, 
-        message: error.response?.data || 'Login failed. Please try again.' 
+        message: error.response?.data?.message || 'Invalid email or password. Please try again.' 
       };
     }
   };
@@ -238,7 +238,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Registration error:', error);
       return { 
         success: false, 
-        message: error.response?.data || 'Registration failed. Please try again.' 
+        message: error.response?.data?.message || 'Registration failed. Email may already be in use.' 
       };
     }
   };

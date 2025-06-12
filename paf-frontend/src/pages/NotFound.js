@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { FaExclamationTriangle, FaArrowLeft } from 'react-icons/fa';
+import '../styles/NotFound.css';
 
 const NotFound = () => {
   return (

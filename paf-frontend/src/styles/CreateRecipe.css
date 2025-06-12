@@ -1,0 +1,188 @@
+/* CreateRecipe.css - Cookbook Dark Theme */
+.createrecipe-background {
+  min-height: 100vh;
+  background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)),
+    url('https://images.unsplash.com/photo-1506089676908-3592f7389d4d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-color: var(--background-dark);
+  position: relative;
+  padding: 2rem 0;
+}
+
+/* Main Content */
+.main-content-container {
+  background: transparent !important;
+  padding: 2rem 0;
+}
+
+/* Card Styling */
+.card, .custom-card {
+  background: rgba(26, 26, 26, 0.95) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Typography */
+h2 {
+  font-family: 'Merriweather', 'Georgia', serif;
+  color: var(--text-primary);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* Form Styling */
+.form-label {
+  color: var(--text-primary) !important;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.form-control,
+.form-select {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-primary) !important;
+  border-radius: 12px !important;
+  padding: 0.75rem 1rem !important;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.1) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Textarea */
+textarea.form-control {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, #e67e22, #d35400) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50px !important;
+  padding: 0.75rem 2rem !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(230, 126, 34, 0.4) !important;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 50px !important;
+  padding: 0.75rem 2rem !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: var(--text-primary) !important;
+  transform: translateY(-2px);
+}
+
+/* Media Upload Section */
+.media-upload {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.media-upload:hover {
+  border-color: var(--primary-color);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Icons */
+.text-danger {
+  color: #e74c3c !important;
+}
+
+/* Loading State */
+.spinner-border {
+  color: var(--primary-color) !important;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Override Bootstrap defaults */
+.bg-white {
+  background: rgba(26, 26, 26, 0.95) !important;
+}
+
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+.border {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 2rem;
+  }
+  
+  .card {
+    border-radius: 15px !important;
+  }
+  
+  .btn {
+    padding: 0.65rem 1.5rem !important;
+  }
+}
+
+/* Scroll Bar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}

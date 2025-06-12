@@ -4,6 +4,7 @@ import { Container, Row, Col, Form, Button, Card, Alert, Spinner } from 'react-b
 import { AuthContext } from '../context/AuthContext';
 import { profileService } from '../api/apiService';
 import { FaUserCircle, FaSave } from 'react-icons/fa';
+import '../styles/EditProfile.css';
 
 const EditProfile = () => {
   const { currentUser } = useContext(AuthContext);
@@ -112,120 +113,122 @@ const EditProfile = () => {
   }
 
   return (
-    <Container className="py-4">
-      <Row className="justify-content-center">
-        <Col md={8}>
-          <Card className="custom-card">
-            <Card.Body>
-              <h2 className="mb-4">Edit Your Profile</h2>
-              
-              {error && <Alert variant="danger">{error}</Alert>}
-              {success && <Alert variant="success">Profile saved successfully!</Alert>}
-              
-              <Form onSubmit={handleSubmit}>
-                <Row className="mb-4">
-                  <Col md={4} className="text-center">
-                    {profileData.image ? (
-                      <img 
-                        src={profileData.image} 
-                        alt="Profile preview" 
-                        className="rounded-circle img-fluid mb-3" 
-                        style={{ width: '150px', height: '150px', objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <FaUserCircle size={150} className="text-secondary mb-3" />
-                    )}
-                  </Col>
-                  
-                  <Col md={8}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Profile Image URL</Form.Label>
-                      <Form.Control 
-                        type="text" 
-                        name="image" 
-                        value={profileData.image} 
-                        onChange={handleChange}
-                        placeholder="Enter URL for your profile image"
-                      />
-                      <Form.Text className="text-muted">
-                        Enter a URL to an image for your profile picture
-                      </Form.Text>
-                    </Form.Group>
-                    
-                    <Form.Group className="mb-3">
-                      <Form.Check 
-                        type="checkbox" 
-                        name="profileVisibility" 
-                        checked={profileData.profileVisibility} 
-                        onChange={handleChange}
-                        label="Make profile public (visible to everyone)" 
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
+    <div className="editprofile-background">
+      <Container className="py-4 main-content-container">
+        <Row className="justify-content-center">
+          <Col md={8}>
+            <Card className="custom-card">
+              <Card.Body>
+                <h2 className="mb-4">Edit Your Profile</h2>
                 
-                <Form.Group className="mb-3">
-                  <Form.Label>Bio</Form.Label>
-                  <Form.Control 
-                    as="textarea" 
-                    rows={3} 
-                    name="biography" 
-                    value={profileData.biography} 
-                    onChange={handleChange}
-                    placeholder="Tell us about yourself"
-                  />
-                </Form.Group>
+                {error && <Alert variant="danger">{error}</Alert>}
+                {success && <Alert variant="success">Profile saved successfully!</Alert>}
                 
-                <Form.Group className="mb-3">
-                  <Form.Label>Fitness Goals</Form.Label>
-                  <Form.Control 
-                    as="textarea" 
-                    rows={3} 
-                    name="fitnessGoals" 
-                    value={profileData.fitnessGoals} 
-                    onChange={handleChange}
-                    placeholder="What are your fitness goals?"
-                  />
-                </Form.Group>
-                
-                <div className="d-flex justify-content-between">
-                  <Button 
-                    variant="secondary" 
-                    onClick={() => navigate(`/profile/${currentUser.id}`)}
-                  >
-                    Cancel
-                  </Button>
-                  
-                  <Button 
-                    type="submit" 
-                    variant="primary"
-                    disabled={saving}
-                  >
-                    {saving ? (
-                      <>
-                        <Spinner 
-                          as="span" 
-                          animation="border" 
-                          size="sm" 
-                          role="status" 
-                          aria-hidden="true" 
-                          className="me-2"
+                <Form onSubmit={handleSubmit}>
+                  <Row className="mb-4">
+                    <Col md={4} className="text-center">
+                      {profileData.image ? (
+                        <img 
+                          src={profileData.image} 
+                          alt="Profile preview" 
+                          className="rounded-circle img-fluid mb-3" 
+                          style={{ width: '150px', height: '150px', objectFit: 'cover' }}
                         />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <FaSave className="me-2" /> Save Profile
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+                      ) : (
+                        <FaUserCircle size={150} className="text-secondary mb-3" />
+                      )}
+                    </Col>
+                    
+                    <Col md={8}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Profile Image URL</Form.Label>
+                        <Form.Control 
+                          type="text" 
+                          name="image" 
+                          value={profileData.image} 
+                          onChange={handleChange}
+                          placeholder="Enter URL for your profile image"
+                        />
+                        <Form.Text className="text-muted">
+                          Enter a URL to an image for your profile picture
+                        </Form.Text>
+                      </Form.Group>
+                      
+                      <Form.Group className="mb-3">
+                        <Form.Check 
+                          type="checkbox" 
+                          name="profileVisibility" 
+                          checked={profileData.profileVisibility} 
+                          onChange={handleChange}
+                          label="Make profile public (visible to everyone)" 
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  
+                  <Form.Group className="mb-3">
+                    <Form.Label>Bio</Form.Label>
+                    <Form.Control 
+                      as="textarea" 
+                      rows={3} 
+                      name="biography" 
+                      value={profileData.biography} 
+                      onChange={handleChange}
+                      placeholder="Tell us about yourself"
+                    />
+                  </Form.Group>
+                  
+                  <Form.Group className="mb-3">
+                    <Form.Label>Cooking Goals</Form.Label>
+                    <Form.Control 
+                      as="textarea" 
+                      rows={3} 
+                      name="fitnessGoals" 
+                      value={profileData.fitnessGoals} 
+                      onChange={handleChange}
+                      placeholder="What are your fitness goals?"
+                    />
+                  </Form.Group>
+                  
+                  <div className="d-flex justify-content-between">
+                    <Button 
+                      variant="secondary" 
+                      onClick={() => navigate(`/profile/${currentUser.id}`)}
+                    >
+                      Cancel
+                    </Button>
+                    
+                    <Button 
+                      type="submit" 
+                      variant="primary"
+                      disabled={saving}
+                    >
+                      {saving ? (
+                        <>
+                          <Spinner 
+                            as="span" 
+                            animation="border" 
+                            size="sm" 
+                            role="status" 
+                            aria-hidden="true" 
+                            className="me-2"
+                          />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <FaSave className="me-2" /> Save Profile
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </Form>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   );
 };
 

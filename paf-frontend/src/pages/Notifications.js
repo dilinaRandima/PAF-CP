@@ -4,6 +4,7 @@ import { Container, Row, Col, Card, Button, Spinner, Alert, Badge } from 'react-
 import { AuthContext } from '../context/AuthContext';
 import { notificationService, userService } from '../api/apiService';
 import { FaBell, FaCheck, FaTrash, FaHeart, FaComment, FaUsers } from 'react-icons/fa';
+import '../styles/Notifications.css'; // Import the new CSS file
 
 const Notifications = () => {
   const { currentUser } = useContext(AuthContext);
@@ -131,103 +132,95 @@ const Notifications = () => {
     );
   }
 
+  if (error) {
+    return (
+      <Container className="py-5">
+        <div className="alert alert-danger">{error}</div>
+        <Button onClick={fetchNotifications}>Try Again</Button>
+      </Container>
+    );
+  }
+
   return (
-    <Container className="py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Notifications</h2>
-        
-        {notifications.some(notif => !notif.read) && (
-          <Button 
-            variant="outline-primary" 
-            onClick={handleMarkAllAsRead}
-          >
-            <FaCheck className="me-2" /> Mark All as Read
-          </Button>
-        )}
-      </div>
-      
-      {error && <Alert variant="danger">{error}</Alert>}
-      
-      {notifications.length === 0 ? (
-        <Card className="text-center p-5">
-          <Card.Body>
-            <FaBell size={50} className="text-muted mb-3" />
-            <h4>No Notifications</h4>
-            <p className="text-muted">You don't have any notifications yet.</p>
-          </Card.Body>
-        </Card>
-      ) : (
-        <Row>
-          <Col lg={8} className="mx-auto">
-            {notifications.map(notification => (
-              <Card 
-                key={notification.id} 
-                className={`mb-3 ${!notification.read ? 'border-primary' : ''}`}
-              >
-                <Card.Body>
-                  <div className="d-flex align-items-start">
-                    <div className="me-3 mt-1">
-                      {getNotificationIcon(notification.type)}
-                    </div>
-                    
-                    <div className="flex-grow-1">
-                      <div className="d-flex justify-content-between">
-                        <div>
-                          <Link 
-                            to={getNotificationLink(notification)} 
-                            className="text-decoration-none"
-                            onClick={() => handleMarkAsRead(notification.id)}
-                          >
-                            <p className="mb-1">
-                              {notification.message}
-                            </p>
-                          </Link>
-                          <small className="text-muted">
-                            {new Date(notification.timestamp).toLocaleString()}
-                          </small>
-                        </div>
-                        
-                        <div className="d-flex">
-                          {!notification.read && (
+    <div className="notifications-background">
+      <Container className="py-4 main-content-container">
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2>Notifications</h2>
+          {notifications.some(notif => !notif.read) && (
+            <Button 
+              variant="outline-primary" 
+              onClick={handleMarkAllAsRead}
+            >
+              <FaCheck className="me-2" /> Mark All as Read
+            </Button>
+          )}
+        </div>
+        {notifications.length === 0 ? (
+          <Card className="text-center p-5">
+            <Card.Body>
+              <FaBell size={50} className="text-muted mb-3" />
+              <h4>No Notifications</h4>
+              <p className="text-muted">You don't have any notifications yet.</p>
+            </Card.Body>
+          </Card>
+        ) : (
+          <Row>
+            <Col lg={8} className="mx-auto">
+              {notifications.map(notification => (
+                <Card 
+                  key={notification.id} 
+                  className={`mb-3 ${!notification.read ? 'border-primary' : ''}`}
+                >
+                  <Card.Body>
+                    <div className="d-flex align-items-start">
+                      <div className="me-3 mt-1">
+                        {getNotificationIcon(notification.type)}
+                      </div>
+                      <div className="flex-grow-1">
+                        <div className="d-flex justify-content-between">
+                          <div>
+                            <Link 
+                              to={getNotificationLink(notification)} 
+                              className="text-decoration-none"
+                              onClick={() => handleMarkAsRead(notification.id)}
+                            >
+                              <p className="mb-1">
+                                {notification.message}
+                              </p>
+                            </Link>
+                            <small className="text-muted">
+                              {new Date(notification.timestamp).toLocaleString()}
+                            </small>
+                          </div>
+                          <div className="d-flex">
+                            {!notification.read && (
+                              <Button 
+                                variant="link" 
+                                className="text-primary p-0 me-3"
+                                onClick={() => handleMarkAsRead(notification.id)}
+                              >
+                                <FaCheck />
+                              </Button>
+                            )}
                             <Button 
                               variant="link" 
-                              className="text-primary p-0 me-3" 
-                              onClick={() => handleMarkAsRead(notification.id)}
-                              title="Mark as read"
+                              className="text-danger p-0"
+                              onClick={() => handleDeleteNotification(notification.id)}
                             >
-                              <FaCheck />
+                              <FaTrash />
                             </Button>
-                          )}
-                          
-                          <Button 
-                            variant="link" 
-                            className="text-danger p-0" 
-                            onClick={() => handleDeleteNotification(notification.id)}
-                            title="Delete notification"
-                          >
-                            <FaTrash />
-                          </Button>
+                          </div>
                         </div>
                       </div>
-                      
-                      {notification.actionUserId && (
-                        <small className="text-muted">
-                          From: {users[notification.actionUserId]?.username || 'Unknown User'}
-                        </small>
-                      )}
-                      
-                      {!notification.read && (
-                        <Badge bg="primary" className="ms-2">New</Badge>
-                      )}
                     </div>
-                  </div>
-                </Card.Body>
-              </Card>
-            ))}
-          </Col>
-        </Row>
-      )}
-    </Container>
+                  </Card.Body>
+                </Card>
+              ))}
+            </Col>
+          </Row>
+        )}
+      </Container>
+    </div>
   );
 };
 

@@ -4,6 +4,7 @@ import { Container, Row, Col, Card, Button, Spinner, Alert, Badge } from 'react-
 import { AuthContext } from '../context/AuthContext';
 import { groupService, userService } from '../api/apiService';
 import { FaUsers, FaPlus, FaSearch } from 'react-icons/fa';
+import '../styles/Groups.css';
 
 const Groups = () => {
   const { currentUser } = useContext(AuthContext);
@@ -88,36 +89,109 @@ const Groups = () => {
   }
 
   return (
-    <Container className="py-4">
-      <div className="d-flex justify-content-between align-items-center mb-5">
-        <h2>Cooking Communities</h2>
-        <Button 
-          as={Link} 
-          to="/create-group" 
-          variant="primary"
-        >
-          <FaPlus className="me-2" /> Create Group
-        </Button>
-      </div>
-      
-      {error && <Alert variant="danger">{error}</Alert>}
-      
-      <div className="mb-4 position-relative">
-        <FaSearch className="position-absolute" style={{ left: '15px', top: '12px', color: '#aaa' }} />
-        <input
-          type="text"
-          placeholder="Search..."
-          className="form-control ps-5"
-          value={filterText}
-          onChange={(e) => setFilterText(e.target.value)}
-        />
-      </div>
-      
-      {userGroups.length > 0 && (
-        <>
-          <h3 className="mb-3">Your Groups</h3>
-          <Row className="mb-5">
-            {filteredUserGroups.map(group => (
+    <div className="groups-background">
+      <Container className="py-4 main-content-container">
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2>Cooking Communities</h2>
+          <Button 
+            as={Link} 
+            to="/create-group" 
+            variant="primary"
+          >
+            <FaPlus className="me-2" /> Create Group
+          </Button>
+        </div>
+        
+        {error && <Alert variant="danger">{error}</Alert>}
+        
+        <div className="mb-4 position-relative search-bar-group">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search groups..."
+            className="form-control search-input"
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+          />
+        </div>
+        
+        {userGroups.length > 0 && (
+          <>
+            <h3 className="mb-3">Your Groups</h3>
+            <Row className="mb-5">
+              {filteredUserGroups.map(group => (
+                <Col lg={4} md={6} className="mb-4" key={group.id}>
+                  <Card className="h-100 custom-card">
+                    {group.imageUrl && (
+                      <Card.Img 
+                        variant="top" 
+                        src={group.imageUrl} 
+                        alt={group.name}
+                        style={{ height: '160px', objectFit: 'cover' }}
+                      />
+                    )}
+                    <Card.Body>
+                      <Card.Title>{group.name}</Card.Title>
+                      <div className="text-muted mb-2">
+                        Created by {users[group.creatorId]?.username || 'Unknown User'}
+                      </div>
+                      <Card.Text>
+                        {group.description?.length > 100 
+                          ? `${group.description.substring(0, 100)}...` 
+                          : group.description}
+                      </Card.Text>
+                      <div className="mb-3">
+                        <small className="text-muted">
+                          {group.memberIds?.length || 0} members
+                        </small>
+                      </div>
+                      {group.tags && group.tags.length > 0 && (
+                        <div className="mb-3">
+                          {group.tags.map((tag, index) => (
+                            <Badge bg="secondary" className="me-1 mb-1" key={index}>
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </Card.Body>
+                    <Card.Footer className="bg-white">
+                      <Button 
+                        as={Link} 
+                        to={`/groups/${group.id}`} 
+                        variant="outline-primary" 
+                        className="w-100"
+                      >
+                        View Group
+                      </Button>
+                    </Card.Footer>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </>
+        )}
+        
+        <h3 className="mb-3">Discover Groups</h3>
+        {filteredPublicGroups.length === 0 ? (
+          <Card className="text-center p-5">
+            <Card.Body>
+              <FaUsers size={50} className="text-muted mb-3" />
+              <h4>No Groups Found</h4>
+              <p className="text-muted">Try clearing your search or create your own group!</p>
+              <Button 
+                as={Link} 
+                to="/create-group" 
+                variant="primary" 
+                className="mt-3"
+              >
+                Create a Group
+              </Button>
+            </Card.Body>
+          </Card>
+        ) : (
+          <Row>
+            {filteredPublicGroups.map(group => (
               <Col lg={4} md={6} className="mb-4" key={group.id}>
                 <Card className="h-100 custom-card">
                   {group.imageUrl && (
@@ -140,7 +214,7 @@ const Groups = () => {
                     </Card.Text>
                     <div className="mb-3">
                       <small className="text-muted">
-                        {group.memberIds?.length || 0} members count
+                        {group.memberIds?.length || 0} members
                       </small>
                     </div>
                     {group.tags && group.tags.length > 0 && (
@@ -167,80 +241,9 @@ const Groups = () => {
               </Col>
             ))}
           </Row>
-        </>
-      )}
-      
-      <h3 className="mb-3">Discover Groups</h3>
-      {filteredPublicGroups.length === 0 ? (
-        <Card className="text-center p-5">
-          <Card.Body>
-            <FaUsers size={50} className="text-muted mb-3" />
-            <h4>No Groups Found</h4>
-            <p className="text-muted">create your own group!</p>
-            <Button 
-              as={Link} 
-              to="/create-group" 
-              variant="primary" 
-              className="mt-3"
-            >
-              Create a Group
-            </Button>
-          </Card.Body>
-        </Card>
-      ) : (
-        <Row>
-          {filteredPublicGroups.map(group => (
-            <Col lg={4} md={6} className="mb-4" key={group.id}>
-              <Card className="h-100 custom-card">
-                {group.imageUrl && (
-                  <Card.Img 
-                    variant="top" 
-                    src={group.imageUrl} 
-                    alt={group.name}
-                    style={{ height: '160px', objectFit: 'cover' }}
-                  />
-                )}
-                <Card.Body>
-                  <Card.Title>{group.name}</Card.Title>
-                  <div className="text-muted mb-2">
-                    Created by {users[group.creatorId]?.username || 'Unknown User'}
-                  </div>
-                  <Card.Text>
-                    {group.description?.length > 100 
-                      ? `${group.description.substring(0, 100)}...` 
-                      : group.description}
-                  </Card.Text>
-                  <div className="mb-3">
-                    <small className="text-muted">
-                      {group.memberIds?.length || 0} members
-                    </small>
-                  </div>
-                  {group.tags && group.tags.length > 0 && (
-                    <div className="mb-3">
-                      {group.tags.map((tag, index) => (
-                        <Badge bg="secondary" className="me-1 mb-1" key={index}>
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </Card.Body>
-                <Card.Footer className="bg-white">
-                  <Button 
-                    as={Link} 
-                    to={`/groups/${group.id}`} 
-                    variant="outline-primary" 
-                    className="w-100"
-                  >
-                    View Group
-                  </Button>
-                </Card.Footer>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      )}
-    </Container>
+        )}
+      </Container>
+    </div>
   );
 };
 

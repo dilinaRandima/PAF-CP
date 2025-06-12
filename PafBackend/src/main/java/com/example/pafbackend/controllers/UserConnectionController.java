@@ -2,7 +2,6 @@ package com.example.pafbackend.controllers;
 
 import com.example.pafbackend.models.UserConnection;
 import com.example.pafbackend.repositories.UserConnectionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +14,6 @@ public class UserConnectionController {
 
     private final UserConnectionRepository userConnectionRepository;
 
-    @Autowired
     public UserConnectionController(UserConnectionRepository userConnectionRepository) {
         this.userConnectionRepository = userConnectionRepository;
     }

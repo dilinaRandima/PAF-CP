@@ -1,0 +1,316 @@
+/* =========== AGGRESSIVE VISIBILITY FIXES - OVERRIDE ALL =========== */
+
+/* Force all text to be visible */
+* {
+  color: inherit !important;
+}
+
+body * {
+  opacity: 1 !important;
+}
+
+/* Base text colors with maximum specificity */
+body .feed-background *,
+body .myrecipes-background *,
+body .bookmarks-background *,
+body .notifications-background *,
+body .groups-background *,
+body .community-background *,
+body .profile-background * {
+  color: #e0e0e0 !important;
+}
+
+/* Headings should be white */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6,
+.card-title, .modal-title, .page-title {
+  color: #ffffff !important;
+}
+
+/* Paragraphs and general text */
+p, span, div, small, label, li, td, th,
+.text, .content, .description, .caption {
+  color: #e0e0e0 !important;
+}
+
+/* Fix specific Bootstrap overrides */
+.text-muted {
+  color: #b0b0b0 !important;
+  opacity: 1 !important;
+}
+
+.text-dark {
+  color: #e0e0e0 !important;
+}
+
+.text-secondary {
+  color: #b0b0b0 !important;
+}
+
+/* Feed page specific fixes with high specificity */
+.feed-background .recipe-card p,
+.feed-background .recipe-card span,
+.feed-background .recipe-card small,
+.feed-background .recipe-card .card-text,
+.feed-background .recipe-card .post-time,
+.feed-background .recipe-card .author-name {
+  color: #e0e0e0 !important;
+}
+
+/* Recipe card content */
+.recipe-card-content *,
+.recipe-description *,
+.recipe-ingredients-preview *,
+.recipe-instructions * {
+  color: #e0e0e0 !important;
+}
+
+/* Icons - Force visibility */
+.fa, .fas, .far, .fab,
+.icon, .svg-inline--fa,
+[class*="fa-"],
+svg {
+  color: #b0b0b0 !important;
+  opacity: 1 !important;
+}
+
+/* Action buttons and icons */
+.recipe-action-btn,
+.recipe-action-btn *,
+.btn-link,
+.btn-link * {
+  color: #b0b0b0 !important;
+}
+
+.recipe-action-btn:hover,
+.recipe-action-btn:hover *,
+.btn-link:hover,
+.btn-link:hover * {
+  color: var(--primary-color) !important;
+}
+
+/* Specific icon states */
+.liked, .liked *,
+.recipe-action-btn.liked,
+.recipe-action-btn.liked * {
+  color: #e74c3c !important;
+}
+
+.bookmarked, .bookmarked *,
+.recipe-action-btn.bookmarked,
+.recipe-action-btn.bookmarked * {
+  color: var(--primary-color) !important;
+}
+
+/* Comments section */
+.comment-author,
+.comment-time,
+.comment-text,
+.comment-content {
+  color: #e0e0e0 !important;
+}
+
+/* Form inputs with maximum specificity */
+input.form-control,
+textarea.form-control,
+select.form-control,
+.form-control {
+  background-color: rgba(40, 40, 40, 0.95) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+input::placeholder,
+textarea::placeholder,
+.form-control::placeholder {
+  color: #999999 !important;
+  opacity: 1 !important;
+}
+
+/* Buttons */
+.btn {
+  color: #ffffff !important;
+}
+
+.btn-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+
+.btn-secondary {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+  color: #ffffff !important;
+}
+
+/* Override any inline styles */
+[style*="color: black"],
+[style*="color:#000"],
+[style*="color: #000"],
+[style*="color:black"] {
+  color: #e0e0e0 !important;
+}
+
+[style*="color: white"],
+[style*="color:#fff"],
+[style*="color: #fff"],
+[style*="color:white"] {
+  color: #ffffff !important;
+}
+
+/* Card specific overrides */
+.card, .card * {
+  color: #e0e0e0 !important;
+}
+
+.card-header, .card-header * {
+  color: #ffffff !important;
+}
+
+.card-body p,
+.card-body span,
+.card-body small,
+.card-body div {
+  color: #e0e0e0 !important;
+}
+
+/* Navigation */
+.navbar-nav .nav-link {
+  color: #e0e0e0 !important;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+  color: var(--primary-color) !important;
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+  background-color: var(--card-background) !important;
+}
+
+.dropdown-item {
+  color: #e0e0e0 !important;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(255, 107, 61, 0.2) !important;
+  color: var(--primary-color) !important;
+}
+
+/* Badges */
+.badge {
+  color: #ffffff !important;
+}
+
+/* My Recipes specific */
+.myrecipes-background .card-title,
+.myrecipes-background .card-text,
+.myrecipes-background p,
+.myrecipes-background span {
+  color: #e0e0e0 !important;
+}
+
+/* Bookmarks specific */
+.bookmarks-background .card-title,
+.bookmarks-background .card-text,
+.bookmarks-background p,
+.bookmarks-background span {
+  color: #e0e0e0 !important;
+}
+
+/* Community specific */
+.community-background .user-name,
+.community-background .user-bio,
+.community-background p,
+.community-background span {
+  color: #e0e0e0 !important;
+}
+
+/* Profile specific */
+.profile-background .profile-info *,
+.profile-background p,
+.profile-background span {
+  color: #e0e0e0 !important;
+}
+
+/* Notifications specific */
+.notifications-background .notification-message,
+.notifications-background .notification-time,
+.notifications-background p,
+.notifications-background span {
+  color: #e0e0e0 !important;
+}
+
+/* Force override for any black text */
+body * {
+  color: inherit !important;
+}
+
+body {
+  color: #e0e0e0 !important;
+}
+
+/* Ultimate override for problem elements */
+.recipe-card *:not(.btn-primary):not(.badge-primary),
+.feed-background *:not(.btn-primary):not(.badge-primary),
+.myrecipes-background *:not(.btn-primary):not(.badge-primary),
+.bookmarks-background *:not(.btn-primary):not(.badge-primary),
+.notifications-background *:not(.btn-primary):not(.badge-primary),
+.groups-background *:not(.btn-primary):not(.badge-primary),
+.community-background *:not(.btn-primary):not(.badge-primary),
+.profile-background *:not(.btn-primary):not(.badge-primary) {
+  color: inherit !important;
+}
+
+/* React Icons specific fix */
+svg path,
+svg circle,
+svg rect,
+svg polygon {
+  fill: currentColor !important;
+}
+
+/* FontAwesome specific fix */
+.fa:before,
+.fas:before,
+.far:before,
+.fab:before {
+  color: inherit !important;
+}
+
+/* Fix Bootstrap utility classes */
+.text-white { color: #ffffff !important; }
+.text-light { color: #e0e0e0 !important; }
+.text-dark { color: #e0e0e0 !important; }
+.text-body { color: #e0e0e0 !important; }
+.text-muted { color: #b0b0b0 !important; }
+.text-primary { color: var(--primary-color) !important; }
+.text-secondary { color: #b0b0b0 !important; }
+.text-success { color: #2ecc71 !important; }
+.text-danger { color: #e74c3c !important; }
+.text-warning { color: #f1c40f !important; }
+.text-info { color: #3498db !important; }
+
+/* Post button specific fix */
+.post-button,
+.btn.post-button {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+/* Ensure no element has color: transparent */
+* {
+  color: initial;
+}
+
+/* Final nuclear option - remove any color: transparent or color: inherit that might be causing issues */
+*:not(.btn-primary):not(.badge-primary) {
+  color: #e0e0e0 !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #ffffff !important;
+}

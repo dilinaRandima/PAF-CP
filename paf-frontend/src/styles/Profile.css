@@ -1,0 +1,279 @@
+/* Profile.css - Cookbook Dark Theme */
+.profile-background {
+  min-height: 100vh;
+  background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)),
+    url('https://images.unsplash.com/photo-1519125323398-675f0ddb6308?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-color: var(--background-dark);
+  position: relative;
+  padding: 2rem 0;
+}
+
+/* Main Content */
+.main-content-container {
+  background: transparent !important;
+  padding: 2rem 0;
+}
+
+/* Profile Card */
+.card, .custom-card {
+  background: rgba(26, 26, 26, 0.95) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Profile Avatar */
+.rounded-circle {
+  border: 3px solid var(--primary-color) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.rounded-circle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Typography */
+h2 {
+  font-family: 'Merriweather', 'Georgia', serif;
+  color: var(--text-primary);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+h5 {
+  font-family: 'Merriweather', 'Georgia', serif;
+  color: var(--text-primary);
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+/* Profile Info */
+.profile-info {
+  animation: fadeInLeft 0.8s ease;
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, #e67e22, #d35400) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50px !important;
+  padding: 0.75rem 2rem !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(230, 126, 34, 0.4) !important;
+}
+
+.btn-outline-primary,
+.btn-outline-danger {
+  background: transparent;
+  border: 2px solid;
+  border-radius: 25px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-primary {
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.btn-outline-primary:hover {
+  background: var(--primary-color) !important;
+  color: var(--background-dark) !important;
+  transform: translateY(-2px);
+}
+
+.btn-outline-danger {
+  color: #e74c3c !important;
+  border-color: #e74c3c !important;
+}
+
+.btn-outline-danger:hover {
+  background: #e74c3c !important;
+  color: white !important;
+  transform: translateY(-2px);
+}
+
+/* Tabs */
+.nav-tabs {
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.nav-link {
+  color: var(--text-secondary) !important;
+  font-weight: 600;
+  border: none !important;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: var(--text-primary) !important;
+}
+
+.nav-link.active {
+  color: var(--primary-color) !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary-color);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Card Header */
+.card-header {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 1rem 0;
+}
+
+/* Bio Section */
+.bio-section {
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+/* Icons */
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Loading State */
+.spinner-border {
+  color: var(--primary-color) !important;
+}
+
+/* Alert */
+.alert-warning {
+  background: rgba(241, 196, 15, 0.1) !important;
+  border: 1px solid rgba(241, 196, 15, 0.3) !important;
+  color: #f1c40f !important;
+  border-radius: 12px;
+}
+
+.alert-danger {
+  background: rgba(231, 76, 60, 0.1) !important;
+  border: 1px solid rgba(231, 76, 60, 0.3) !important;
+  color: #e74c3c !important;
+  border-radius: 12px;
+}
+
+/* Empty State */
+.text-center.py-5 {
+  padding: 5rem 2rem !important;
+}
+
+/* Override Bootstrap defaults */
+.bg-white {
+  background: rgba(26, 26, 26, 0.95) !important;
+}
+
+.border {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 2rem;
+  }
+  
+  .rounded-circle {
+    width: 120px !important;
+    height: 120px !important;
+  }
+  
+  .profile-info {
+    text-align: center;
+    margin-top: 1rem;
+  }
+}
+
+/* Scroll Bar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}

@@ -1,0 +1,318 @@
+/* =========== VISIBILITY FIXES FOR SPECIFIC PAGES =========== */
+
+/* Feed Page Text & Icon Fixes */
+.feed-background .card-text,
+.feed-background .text-muted,
+.feed-background .post-time,
+.feed-background .author-name,
+.feed-background .comment-text,
+.feed-background .form-control,
+.feed-background small,
+.feed-background p {
+  color: #e0e0e0 !important;
+}
+
+/* Recipe Card Specific Fixes */
+.recipe-card-content p,
+.recipe-description p,
+.recipe-instructions p,
+.ingredient-item,
+.recipe-badge {
+  color: #e0e0e0 !important;
+}
+
+/* Icon Visibility Fixes */
+.recipe-action-btn {
+  color: #b0b0b0 !important;
+}
+
+.recipe-action-btn:hover {
+  color: var(--primary-color) !important;
+}
+
+.recipe-action-btn svg,
+.nav-icon svg,
+.action-btn svg {
+  color: inherit !important;
+}
+
+/* Heart, Bookmark, Comment Icons */
+.fa-heart,
+.fa-bookmark,
+.fa-comment,
+.fa-share {
+  color: #b0b0b0 !important;
+}
+
+.fa-heart:hover,
+.fa-bookmark:hover,
+.fa-comment:hover,
+.fa-share:hover {
+  color: var(--primary-color) !important;
+}
+
+.liked .fa-heart {
+  color: #e74c3c !important;
+}
+
+.bookmarked .fa-bookmark {
+  color: var(--primary-color) !important;
+}
+
+/* My Recipes Page Fixes */
+.myrecipes-background .card-title,
+.myrecipes-background .card-text,
+.myrecipes-background p,
+.myrecipes-background small {
+  color: #e0e0e0 !important;
+}
+
+/* Bookmarks Page Fixes */
+.bookmarks-background .card-title,
+.bookmarks-background .card-text,
+.bookmarks-background p,
+.bookmarks-background small,
+.bookmarks-background .ingredient-item,
+.bookmarks-background .instruction-text {
+  color: #e0e0e0 !important;
+}
+
+/* Community Page Fixes */
+.community-background .user-name,
+.community-background .user-bio,
+.community-background .user-stat-label,
+.community-background .user-stat-value {
+  color: #e0e0e0 !important;
+}
+
+/* Profile Page Fixes */
+.profile-background h2,
+.profile-background h5,
+.profile-background p,
+.profile-background .bio-text,
+.profile-background .text-muted {
+  color: #e0e0e0 !important;
+}
+
+/* Notifications Page Fixes */
+.notifications-background .notification-message,
+.notifications-background .notification-time,
+.notifications-background p,
+.notifications-background small {
+  color: #e0e0e0 !important;
+}
+
+/* Form Elements - Better Visibility */
+.form-control {
+  background-color: rgba(40, 40, 40, 0.95) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.form-control::placeholder {
+  color: #999999 !important;
+}
+
+.form-control:focus {
+  background-color: rgba(50, 50, 50, 0.95) !important;
+  color: #ffffff !important;
+  border-color: var(--primary-color) !important;
+}
+
+/* Button Visibility Fixes */
+.btn-link {
+  color: #b0b0b0 !important;
+}
+
+.btn-link:hover {
+  color: var(--primary-color) !important;
+  text-decoration: none;
+}
+
+/* Action Buttons on Cards */
+.recipe-action-btn,
+.action-count {
+  color: #b0b0b0 !important;
+  font-weight: 500;
+}
+
+.recipe-action-btn:hover,
+.recipe-action-btn:hover .action-count {
+  color: var(--primary-color) !important;
+}
+
+/* User Avatar Icons */
+.fa-user-circle,
+.user-icon {
+  color: #b0b0b0 !important;
+}
+
+/* Comment Section Fixes */
+.comment-input-container .form-control {
+  background-color: rgba(50, 50, 50, 0.95) !important;
+  color: #ffffff !important;
+}
+
+.comment-author,
+.comment-time {
+  color: #b0b0b0 !important;
+}
+
+.comment-text {
+  color: #e0e0e0 !important;
+}
+
+/* Badge Visibility */
+.badge {
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.badge-primary {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+
+.badge-secondary {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #e0e0e0 !important;
+}
+
+/* Dropdown Menu Items */
+.dropdown-item {
+  color: #e0e0e0 !important;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(255, 107, 61, 0.2) !important;
+  color: var(--primary-color) !important;
+}
+
+/* Card Headers and Footers */
+.card-header,
+.card-footer {
+  background-color: rgba(30, 30, 30, 0.95) !important;
+  color: #e0e0e0 !important;
+}
+
+/* Tab Navigation */
+.nav-tabs .nav-link {
+  color: #b0b0b0 !important;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--primary-color) !important;
+  background-color: var(--card-background) !important;
+  border-color: var(--primary-color) !important;
+}
+
+/* Alert Messages */
+.alert {
+  color: #e0e0e0 !important;
+}
+
+.alert-danger {
+  background-color: rgba(231, 76, 60, 0.2) !important;
+  border-color: rgba(231, 76, 60, 0.5) !important;
+  color: #ff6b6b !important;
+}
+
+.alert-success {
+  background-color: rgba(46, 204, 113, 0.2) !important;
+  border-color: rgba(46, 204, 113, 0.5) !important;
+  color: #51cf66 !important;
+}
+
+/* Post Button Fix */
+.post-button {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.post-button:hover {
+  background-color: var(--primary-dark) !important;
+  color: #ffffff !important;
+}
+
+/* Universal Text Visibility Override */
+.text-dark {
+  color: #e0e0e0 !important;
+}
+
+/* Fix for specific problematic text */
+.recipe-title,
+.group-name,
+.notification-text,
+.comment-content,
+.post-content {
+  color: #ffffff !important;
+}
+
+/* Ensure all paragraphs are visible */
+p, span, small, label, .text-muted {
+  color: #b0b0b0 !important;
+  opacity: 1 !important;
+}
+
+/* Strong text should be brighter */
+strong, b {
+  color: #ffffff !important;
+}
+
+/* Links should be visible */
+a {
+  color: var(--primary-color) !important;
+}
+
+a:hover {
+  color: var(--primary-dark) !important;
+}
+
+/* Fix for icon buttons */
+.btn-icon {
+  color: #b0b0b0 !important;
+}
+
+.btn-icon:hover {
+  color: var(--primary-color) !important;
+}
+
+/* Make sure all text in cards is visible */
+.card * {
+  color: inherit !important;
+}
+
+.card-body p,
+.card-body span,
+.card-body small {
+  color: #e0e0e0 !important;
+}
+
+/* Fix specific feed elements */
+.feed-item-text,
+.feed-description,
+.feed-meta {
+  color: #e0e0e0 !important;
+}
+
+/* Ensure form labels are visible */
+.form-label,
+.input-label {
+  color: #e0e0e0 !important;
+  font-weight: 600;
+}
+
+/* Fix navigation text */
+.navbar-nav .nav-link {
+  color: #e0e0e0 !important;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link:focus {
+  color: var(--primary-color) !important;
+}
+
+/* Override any inline styles */
+[style*="color"] {
+  color: #e0e0e0 !important;
+}

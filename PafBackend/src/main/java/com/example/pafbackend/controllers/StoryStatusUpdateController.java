@@ -2,7 +2,6 @@ package com.example.pafbackend.controllers;
 
 import com.example.pafbackend.models.StoryStatusUpdate;
 import com.example.pafbackend.repositories.StoryStatusUpdateRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +14,6 @@ public class StoryStatusUpdateController {
 
     private final StoryStatusUpdateRepository workoutStatusUpdateRepository;
 
-    @Autowired
     public StoryStatusUpdateController(StoryStatusUpdateRepository workoutStatusUpdateRepository) {
         this.workoutStatusUpdateRepository = workoutStatusUpdateRepository;
     }

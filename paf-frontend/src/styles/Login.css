@@ -1,0 +1,431 @@
+/* Auth Page Background */
+.auth-page {
+  min-height: 100vh;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)),
+    url('https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* App Logo Section */
+.app-logo {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.app-logo h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 0.5rem;
+}
+.app-logo p {
+  color: #bdbdbd;
+  font-size: 1rem;
+}
+
+/* Auth Card */
+.auth-card {
+  background: rgba(26, 26, 26, 0.97);
+  border-radius: 1.2rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25);
+  border: 1px solid rgba(255,255,255,0.08);
+  animation: cardEntrance 0.8s ease-out;
+}
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.auth-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  font-size: 1.3rem;
+  pointer-events: none;
+  height: 1.8em;
+  width: 1.8em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  padding-right: 0;
+}
+
+.ps-5 {
+  padding-left: calc(8px + 2.3em) !important;
+}
+
+.forgot-password {
+  color: #4f8cff;
+  text-decoration: none;
+  font-size: 0.98rem;
+  transition: color 0.2s;
+}
+.forgot-password:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 2rem 0 1.5rem 0;
+}
+.divider span {
+  background: rgba(26, 26, 26, 0.97);
+  padding: 0 1rem;
+  color: #bdbdbd;
+  font-size: 0.95rem;
+  position: relative;
+  z-index: 1;
+}
+.divider:before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #333;
+  z-index: 0;
+}
+
+/* Google Button */
+.btn-light {
+  background: #fff !important;
+  color: #222 !important;
+  border: 1px solid #e0e0e0 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s, border 0.2s;
+}
+.btn-light:hover {
+  background: #db4437 !important;
+  color: #fff !important;
+  border-color: #db4437 !important;
+  box-shadow: 0 4px 16px rgba(219,68,55,0.08);
+}
+
+/* --- Google Button Visibility Fix (Ultimate) --- */
+.btn-light,
+.btn-light:active,
+.btn-light:focus {
+  background: #fff !important;
+  color: #222 !important;
+  border: 1px solid #e0e0e0 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+}
+.btn-light:hover,
+.btn-light:active:hover,
+.btn-light:focus:hover {
+  background: #db4437 !important;
+  color: #fff !important;
+  border-color: #db4437 !important;
+}
+.btn-light .fa-google {
+  color: #db4437 !important;
+  background: transparent !important;
+  transition: color 0.2s;
+}
+.btn-light:hover .fa-google,
+.btn-light:active:hover .fa-google,
+.btn-light:focus:hover .fa-google {
+  color: #fff !important;
+}
+.btn-light span,
+.btn-light strong,
+.btn-light b {
+  color: #222 !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+}
+.btn-light:hover span,
+.btn-light:hover strong,
+.btn-light:hover b {
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+}
+.btn-light:active span,
+.btn-light:focus span {
+  color: #222 !important;
+}
+.btn-light:active:hover span,
+.btn-light:focus:hover span {
+  color: #fff !important;
+}
+.btn-light,
+.btn-light * {
+  text-shadow: 0 1px 2px rgba(0,0,0,0.18) !important;
+}
+.btn-light:disabled,
+.btn-light[disabled] {
+  color: #aaa !important;
+  background: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
+  opacity: 0.7;
+}
+
+/* --- Google Button High-Contrast Fix (Most Specific) --- */
+.btn-light.google-btn,
+.btn-light.google-btn:active,
+.btn-light.google-btn:focus {
+  background: #ff9800 !important; /* Custom orange */
+  color: #fff !important;
+  border: 1px solid #e0e0e0 !important;
+}
+.btn-light.google-btn:hover,
+.btn-light.google-btn:active:hover,
+.btn-light.google-btn:focus:hover {
+  background: #db4437 !important; /* Google red */
+  color: #fff !important;
+  border-color: #db4437 !important;
+}
+.btn-light.google-btn .fa-google {
+  color: #fff !important;
+  transition: color 0.2s;
+}
+.btn-light.google-btn:hover .fa-google,
+.btn-light.google-btn:active:hover .fa-google,
+.btn-light.google-btn:focus:hover .fa-google {
+  color: #fff !important;
+}
+.btn-light.google-btn span,
+.btn-light.google-btn strong,
+.btn-light.google-btn b {
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+  font-weight: 600 !important;
+}
+.btn-light.google-btn:hover span,
+.btn-light.google-btn:hover strong,
+.btn-light.google-btn:hover b {
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+}
+.btn-light.google-btn:disabled,
+.btn-light.google-btn[disabled] {
+  color: #aaa !important;
+  background: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
+  opacity: 0.7;
+}
+
+/* --- Google Button Always Orange --- */
+.btn-light.google-btn,
+.btn-light.google-btn:active,
+.btn-light.google-btn:focus,
+.btn-light.google-btn:hover,
+.btn-light.google-btn:active:hover,
+.btn-light.google-btn:focus:hover {
+  background: #ff9800 !important;
+  color: #fff !important;
+  border: 1px solid #e0e0e0 !important;
+}
+.btn-light.google-btn .fa-google,
+.btn-light.google-btn:hover .fa-google,
+.btn-light.google-btn:active:hover .fa-google,
+.btn-light.google-btn:focus:hover .fa-google {
+  color: #fff !important;
+}
+.btn-light.google-btn span,
+.btn-light.google-btn strong,
+.btn-light.google-btn b,
+.btn-light.google-btn:hover span,
+.btn-light.google-btn:hover strong,
+.btn-light.google-btn:hover b {
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+  font-weight: 600 !important;
+}
+.btn-light.google-btn:disabled,
+.btn-light.google-btn[disabled] {
+  color: #aaa !important;
+  background: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
+  opacity: 0.7;
+}
+
+/* --- FINAL: Google Button Always Orange, Highest Specificity --- */
+button.btn-light.google-btn,
+.btn-light.google-btn,
+.btn-light.google-btn:active,
+.btn-light.google-btn:focus,
+.btn-light.google-btn:hover,
+.btn-light.google-btn:active:hover,
+.btn-light.google-btn:focus:hover {
+  background: #ff9800 !important;
+  color: #fff !important;
+  border: 1px solid #e0e0e0 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+button.btn-light.google-btn .fa-google,
+.btn-light.google-btn .fa-google,
+.btn-light.google-btn:hover .fa-google,
+.btn-light.google-btn:active:hover .fa-google,
+.btn-light.google-btn:focus:hover .fa-google {
+  color: #ffffff !important;
+}
+button.btn-light.google-btn span,
+.btn-light.google-btn span,
+.btn-light.google-btn strong,
+.btn-light.google-btn b,
+.btn-light.google-btn:hover span,
+.btn-light.google-btn:hover strong,
+.btn-light.google-btn:hover b {
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.18) !important;
+  font-weight: 700 !important;
+}
+button.btn-light.google-btn:disabled,
+.btn-light.google-btn:disabled,
+.btn-light.google-btn[disabled] {
+  color: #aaa !important;
+  background: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
+  opacity: 0.7 !important;
+}
+
+/* Error Alert Animation */
+.animate__headShake {
+  animation: errorShake 0.5s;
+}
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .auth-card {
+    padding: 1.5rem 0.5rem !important;
+  }
+  .app-logo h1 {
+    font-size: 1.5rem;
+  }
+  .auth-title {
+    font-size: 1.3rem;
+  }
+}
+
+/* Custom checkbox (for remember me) */
+.custom-checkbox .form-check-input[type="checkbox"] {
+  accent-color: #4f8cff;
+  width: 18px;
+  height: 18px;
+}
+
+/* Utility: white-50 */
+.text-white-50 {
+  color: rgba(255,255,255,0.5) !important;
+}
+
+/* Utility: white */
+.text-white {
+  color: #fff !important;
+}
+
+/* Utility: primary */
+.text-primary {
+  color: #4f8cff !important;
+}
+
+/* Utility: fw-bold */
+.fw-bold {
+  font-weight: 700 !important;
+}
+
+/* Utility: mb-0 */
+.mb-0 {
+  margin-bottom: 0 !important;
+}
+
+/* Utility: mt-2 */
+.mt-2 {
+  margin-top: 0.5rem !important;
+}
+
+/* Utility: mb-4 */
+.mb-4 {
+  margin-bottom: 1.5rem !important;
+}
+
+/* Utility: w-100 */
+.w-100 {
+  width: 100% !important;
+}
+
+/* Utility: btn-lg */
+.btn-lg, .w-100.btn-lg, .btn-lg.w-100 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem !important;
+  padding: 0.85rem 1.5rem !important;
+}
+
+/* Utility: d-flex, align-items-center, justify-content-center */
+.d-flex {
+  display: flex !important;
+}
+.align-items-center {
+  align-items: center !important;
+}
+.justify-content-center {
+  justify-content: center !important;
+}
+
+/* Utility: me-2 */
+.me-2 {
+  margin-right: 0.5rem !important;
+}
+
+/* Spinner for loading */
+.spinner-border {
+  display: inline-block;
+  width: 1.2rem;
+  height: 1.2rem;
+  vertical-align: text-bottom;
+  border: 0.15em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border 0.75s linear infinite;
+}
+@keyframes spinner-border {
+  to { transform: rotate(360deg); }
+}
+
+/* Ensure input text never overlaps icon */
+.position-relative .input-icon {
+  left: 8px;
+  width: 2em;
+  font-size: 1.3rem;
+}
+
+.position-relative input.form-control {
+  padding-left: 2.8em !important;
+}

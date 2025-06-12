@@ -1,0 +1,238 @@
+/* Media Gallery - Grid Layout for Multiple Items */
+.recipe-media-gallery {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 12px !important;
+  padding: 1rem !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 250px !important;
+  max-height: 500px !important;
+}
+
+/* Override any conflicting display styles */
+.recipe-media-gallery > * {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Force aspect ratio for all media items */
+.recipe-media-item,
+.recipe-media-gallery iframe,
+.recipe-media-gallery video,
+.video-preview-container,
+.recipe-media-gallery > img {
+  width: 100% !important;
+  height: 250px !important;
+  object-fit: cover !important;
+  border-radius: 8px !important;
+  display: block !important;
+  max-width: 100% !important;
+  transition: transform 0.3s ease !important;
+}
+
+/* SPECIAL CASE FOR SINGLE MEDIA ITEM - This is the key fix */
+.recipe-media-gallery:has(> :only-child) {
+  grid-template-columns: 1fr !important;
+  min-height: 400px !important;
+  padding: 0 !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+}
+
+/* Make single media items bigger and centered */
+.recipe-media-gallery:has(> :only-child) > * {
+  width: 100% !important;
+  height: 400px !important;
+  margin: 0 auto !important;
+  max-width: 100% !important;
+  border-radius: 0 !important;
+}
+
+/* For video containers when alone */
+.recipe-media-gallery:has(> .video-preview-container:only-child) {
+  min-height: 400px !important;
+}
+
+.recipe-media-gallery:has(> .video-preview-container:only-child) .video-preview-container,
+.recipe-media-gallery:has(> .video-preview-container:only-child) video {
+  width: 100% !important;
+  height: 400px !important;
+}
+
+/* Special case for YouTube embeds to maintain aspect ratio */
+.recipe-media-gallery iframe {
+  aspect-ratio: 16/9 !important;
+}
+
+/* Special case for YouTube when alone */
+.recipe-media-gallery:has(> iframe:only-child) {
+  min-height: 400px !important;
+}
+
+.recipe-media-gallery:has(> iframe:only-child) iframe {
+  width: 100% !important;
+  height: 400px !important;
+}
+
+/* Video container styling */
+.video-preview-container {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.video-preview-container video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Changes to the recipe card media section */
+.recipe-card .recipe-media-gallery {
+  overflow: hidden !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Additional modifications to handle media variants */
+.recipe-media-gallery:has(> :nth-child(2):last-child) {
+  grid-template-columns: repeat(2, 1fr) !important;
+}
+
+/* Add hover effects */
+.recipe-media-item:hover,
+.recipe-media-gallery > img:hover {
+  transform: scale(1.03) !important;
+}
+
+/* Error message styling */
+.video-error-message {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  width: 100% !important;
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  color: white !important;
+}
+
+/* Style for single media case with class for easy targeting */
+.single-media {
+  min-height: 400px !important;
+  padding: 0 !important;
+}
+
+.single-media > * {
+  height: 400px !important;
+  width: 100% !important;
+  border-radius: 0 !important;
+}
+
+/* Styling for ingredients and instructions lists */
+.ingredients-list,
+.instructions-list {
+  list-style-type: none !important;
+  padding-left: 0 !important;
+  margin-bottom: 1rem !important;
+}
+
+.ingredient-item,
+.instruction-item {
+  display: flex !important;
+  align-items: flex-start !important;
+  margin-bottom: 0.75rem !important;
+  padding-bottom: 0.5rem !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.ingredient-dot,
+.instruction-dot {
+  color: var(--primary-color) !important;
+  font-size: 1.25rem !important;
+  margin-right: 0.75rem !important;
+  line-height: 1 !important;
+  flex-shrink: 0 !important;
+}
+
+.ingredient-text,
+.instruction-text {
+  color: var(--text-light) !important;
+  font-size: 1rem !important;
+  line-height: 1.4 !important;
+  flex: 1 !important;
+}
+
+/* Consistent styling for ingredient and instruction sections */
+.recipe-ingredients-preview,
+.recipe-instructions {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border-radius: 8px !important;
+  padding: 1.25rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.ingredients-title,
+.instructions-title {
+  margin-bottom: 1rem !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Show more/less buttons */
+.show-more-ingredients,
+.show-more-btn {
+  color: var(--primary-color) !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  display: inline-block !important;
+  margin-top: 0.5rem !important;
+}
+
+.show-more-ingredients:hover,
+.show-more-btn:hover {
+  color: var(--primary-dark) !important;
+  text-decoration: underline !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .recipe-media-gallery {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .recipe-media-gallery:has(> :only-child),
+  .recipe-media-gallery:has(> :only-child) > *,
+  .single-media,
+  .single-media > * {
+    height: 350px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .recipe-media-gallery {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .recipe-media-item,
+  .recipe-media-gallery iframe,
+  .recipe-media-gallery video,
+  .video-preview-container,
+  .recipe-media-gallery > img {
+    height: 200px !important;
+  }
+  
+  .recipe-media-gallery:has(> :only-child),
+  .recipe-media-gallery:has(> :only-child) > *,
+  .single-media,
+  .single-media > * {
+    height: 300px !important;
+  }
+  
+  .ingredient-text,
+  .instruction-text {
+    font-size: 0.95rem !important;
+  }
+}

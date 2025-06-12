@@ -1,290 +1,475 @@
-/* App Container */
+/* =========== FOOD HUB DARK THEME STYLES - DESKTOP OPTIMIZED =========== */
+
+/* Color Variables - Dark Theme with Better Contrast */
+:root {
+  --primary-color: #ff6b3d;      /* Orange */
+  --primary-dark: #ff5722;       
+  --text-primary: #ffffff;       /* White text */
+  --text-secondary: #b0b0b0;     /* Lighter gray for better contrast - UPDATED */
+  --text-light: #e0e0e0;         /* Even lighter for better readability */
+  --background-dark: #0f0f0f;    /* Dark background */
+  --background-darker: #000000;  /* Darker background */
+  --card-background: #1a1a1a;    /* Card background */
+  --border-color: #2a2a2a;       /* Border color */
+  --overlay-dark: rgba(0, 0, 0, 0.85);
+  --overlay-light: rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.7);
+  --border-radius-sm: 8px;
+  --border-radius-md: 16px;
+  --border-radius-lg: 24px;
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  --max-width-content: 1400px;    /* Desktop content width */
+  --max-width-narrow: 1200px;     /* Narrower content */
+}
+
+/* Reset and Base Styles */
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text-primary);
+  background-color: var(--background-dark);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
+  font-size: 16px; /* Base font size for desktop */
+}
+
+/* Typography - Improved for Desktop */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Merriweather', 'Georgia', serif;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 4.5rem; /* Larger for desktop */
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+p {
+  color: var(--text-light); /* Better contrast */
+  margin-bottom: 1rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  font-size: 1.1rem; /* Larger for desktop */
+  line-height: 1.7;
+}
+
+/* App Container - Desktop Width */
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  font-family: 'Roboto', sans-serif;
+  background-color: var(--background-dark);
 }
 
-/* Main Content Area */
+/* Content Container - Desktop Optimized */
 .content-container {
   flex: 1;
-  padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--background-dark);
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
 }
 
-/* Header Styles */
+/* Bootstrap Container Override */
+.container {
+  max-width: var(--max-width-content) !important;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+/* Header Styles - Desktop Enhanced */
 .header {
-  background-color: #ffffff;
-  border-bottom: 1px solid #e5e5e5;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background-color: #000000;
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 1rem 0;
+  transition: all var(--transition-normal);
 }
 
-/* Navigation Styles */
+.navbar {
+  background-color: transparent !important;
+  padding: 0.75rem 0;
+}
+
+.navbar-brand {
+  font-family: 'Merriweather', 'Georgia', serif;
+  font-size: 2rem; /* Larger for desktop */
+  font-weight: 700;
+  color: var(--text-primary) !important;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  transition: all var(--transition-fast);
+  letter-spacing: -0.01em;
+}
+
+.brand-icon {
+  font-size: 1.5rem;
+  margin-right: 0.75rem;
+}
+
+.navbar-brand:hover {
+  color: var(--primary-color) !important;
+}
+
+/* Navigation Styles - Desktop Enhanced */
 .nav-link {
-  color: #555;
+  color: var(--text-light) !important; /* Better contrast */
   font-weight: 500;
-  margin: 0 10px;
-  transition: color 0.3s;
+  margin: 0 1.5rem;
+  padding: 0.75rem 0;
+  border-bottom: 3px solid transparent;
+  transition: all var(--transition-fast);
+  position: relative;
+  font-size: 1.05rem; /* Larger for desktop */
+  letter-spacing: -0.01em;
 }
 
-.nav-link:hover, .nav-link.active {
-  color: #3897f0;
+.nav-link:hover {
+  color: var(--text-primary) !important;
 }
 
-/* Footer Styles */
-.footer {
-  padding: 20px 0;
-  text-align: center;
-  background-color: #ffffff;
-  border-top: 1px solid #e5e5e5;
-  color: #8e8e8e;
+.nav-link.active {
+  color: var(--primary-color) !important;
+  border-bottom-color: var(--primary-color);
 }
 
-/* Card Styles */
+/* Hero Section - Desktop Optimized */
+.hero-section {
+  min-height: 90vh; /* Taller for desktop */
+  display: flex;
+  align-items: center;
+  padding: 6rem 0;
+  background-color: var(--background-dark);
+  position: relative;
+  background-image: url('https://images.unsplash.com/photo-1495195134817-aeb325a55b65?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.95) 40%, rgba(0, 0, 0, 0.3) 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 60%; /* Wider on desktop */
+}
+
+.hero-title {
+  font-size: 4.5rem; /* Much larger for desktop */
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 1.6rem; /* Larger for desktop */
+  color: var(--text-light);
+  margin-bottom: 3rem;
+  font-weight: 400;
+}
+
+/* Main Content Container - Desktop Width */
+.main-content-container {
+  max-width: var(--max-width-content);
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+/* Card Styles - Desktop Enhanced */
 .custom-card {
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
   overflow: hidden;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: all var(--transition-normal);
 }
 
 .custom-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
 }
 
-/* Button Styles */
-.custom-button {
-  background-color: #3897f0;
-  border: none;
-  border-radius: 4px;
-  color: white;
-  font-weight: 600;
-  padding: 8px 16px;
-  transition: background-color 0.3s;
-}
-
-.custom-button:hover {
-  background-color: #1877f2;
-}
-
-.custom-button.secondary {
-  background-color: #ffffff;
-  border: 1px solid #3897f0;
-  color: #3897f0;
-}
-
-.custom-button.secondary:hover {
-  background-color: #f0f7ff;
-}
-
-/* Form Styles */
-.custom-form {
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 30px;
-  margin: 20px auto;
-  max-width: 500px;
-}
-
-.form-title {
-  color: #444;
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.form-control {
-  background-color: #f5f7fa;
-  border: 1px solid #e5e5e5;
-  border-radius: 4px;
-  color: #444;
-  padding: 10px 15px;
-}
-
-.form-control:focus {
-  background-color: #ffffff;
-  border-color: #3897f0;
-  box-shadow: 0 0 0 0.25rem rgba(56, 151, 240, 0.25);
-}
-
-/* Profile Styles */
-.profile-header {
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  padding: 30px;
-  text-align: center;
-}
-
-.profile-avatar {
-  border-radius: 50%;
-  height: 150px;
-  margin: 0 auto 20px;
-  object-fit: cover;
-  width: 150px;
-}
-
-.profile-name {
-  color: #444;
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-
-.profile-bio {
-  color: #666;
-  margin-bottom: 20px;
-}
-
-/* Post Styles */
-.post-card {
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+/* Recipe Cards - Desktop Layout */
+.recipe-card {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
   overflow: hidden;
+  transition: all var(--transition-normal);
+  margin-bottom: 2rem;
 }
 
-.post-header {
-  align-items: center;
-  border-bottom: 1px solid #e5e5e5;
-  display: flex;
-  padding: 15px;
+.recipe-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
 }
 
-.post-user-avatar {
-  border-radius: 50%;
-  height: 40px;
-  margin-right: 10px;
-  object-fit: cover;
-  width: 40px;
+/* Recipe Grid - Desktop Columns */
+.row {
+  margin-left: -1rem;
+  margin-right: -1rem;
 }
 
-.post-user-name {
-  color: #444;
+.col-lg-4,
+.col-md-6 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Forms - Desktop Optimized */
+.form-control, .form-select {
+  background: rgba(30,30,30,0.92) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  padding: 0.875rem 1.25rem !important; /* Larger padding for desktop */
+  font-size: 1.05rem !important; /* Larger font for desktop */
+  border-radius: var(--border-radius-sm);
+}
+
+.form-control::placeholder {
+  color: var(--text-secondary) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background: rgba(40,40,40,0.92) !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 0.25rem rgba(255, 107, 61, 0.25) !important;
+}
+
+.form-label {
+  color: var(--text-light) !important;
   font-weight: 600;
-  margin: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
 }
 
-.post-time {
-  color: #8e8e8e;
-  font-size: 12px;
-  margin: 0;
+/* Buttons - Desktop Enhanced */
+.btn {
+  padding: 0.875rem 2rem !important;
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  border-radius: var(--border-radius-lg) !important;
+  transition: all var(--transition-fast) !important;
 }
 
-.post-content {
-  padding: 15px;
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
+  color: white !important;
+  border: none !important;
 }
 
-.post-media {
-  max-height: 500px;
-  object-fit: contain;
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255, 107, 61, 0.3) !important;
+}
+
+/* Auth Pages - Desktop Centered */
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85));
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.auth-card {
+  max-width: 500px;
   width: 100%;
+  background: var(--card-background);
+  border-radius: var(--border-radius-lg);
+  padding: 3rem 2.5rem;
+  box-shadow: var(--shadow-lg);
 }
 
-.post-text {
-  color: #444;
-  margin-top: 15px;
+/* Text Visibility Fixes */
+.text-secondary,
+.text-muted {
+  color: var(--text-secondary) !important;
 }
 
-.post-actions {
-  align-items: center;
-  border-top: 1px solid #e5e5e5;
-  display: flex;
-  padding: 15px;
+.text-primary {
+  color: var(--primary-color) !important;
 }
 
-.post-like-button, .post-comment-button {
-  align-items: center;
-  background: none;
-  border: none;
-  color: #8e8e8e;
-  cursor: pointer;
-  display: flex;
-  font-weight: 600;
-  margin-right: 20px;
+.text-white {
+  color: var(--text-primary) !important;
 }
 
-.post-like-button.active {
-  color: #ed4956;
+/* Background Fixes for Content Areas */
+.feed-background,
+.myrecipes-background,
+.bookmarks-background,
+.notifications-background,
+.groups-background,
+.community-background,
+.profile-background,
+.editprofile-background,
+.editrecipe-background,
+.createrecipe-background,
+.home-page {
+  min-height: 100vh;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
-.post-like-count, .post-comment-count {
-  color: #8e8e8e;
-  margin-left: 5px;
-}
-
-/* Comment Styles */
-.comment-list {
-  padding: 15px;
-}
-
-.comment {
-  margin-bottom: 10px;
-}
-
-.comment-user {
-  color: #444;
-  font-weight: 600;
-  margin-right: 10px;
-}
-
-.comment-text {
-  color: #444;
-}
-
-.comment-form {
-  border-top: 1px solid #e5e5e5;
-  display: flex;
-  padding: 15px;
-}
-
-.comment-input {
-  background-color: #f5f7fa;
-  border: 1px solid #e5e5e5;
-  border-radius: 20px;
-  color: #444;
-  flex-grow: 1;
-  margin-right: 10px;
-  padding: 8px 15px;
-}
-
-.comment-submit {
-  background-color: #3897f0;
-  border: none;
-  border-radius: 20px;
-  color: white;
-  cursor: pointer;
-  font-weight: 600;
-  padding: 8px 15px;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-  .content-container {
-    padding: 10px;
+/* Desktop Responsive Adjustments */
+@media (min-width: 1200px) {
+  .hero-title {
+    font-size: 5rem;
   }
   
-  .custom-form {
-    padding: 20px;
+  .hero-subtitle {
+    font-size: 1.8rem;
   }
   
-  .profile-header {
-    padding: 20px;
+  .container {
+    padding-left: 3rem;
+    padding-right: 3rem;
   }
   
-  .profile-avatar {
-    height: 100px;
-    width: 100px;
+  .recipe-card {
+    margin-bottom: 3rem;
   }
   
-  .post-media {
-    max-height: 300px;
+  .card-body {
+    padding: 2rem;
   }
 }
+
+/* Modal Dialogs - Desktop Optimized */
+.modal-dialog {
+  max-width: 700px;
+  margin: 2rem auto;
+}
+
+.modal-content {
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+}
+
+/* Footer - Desktop */
+.footer {
+  background-color: var(--background-darker);
+  border-top: 1px solid var(--border-color);
+  padding: 4rem 0 3rem;
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 1.05rem;
+}
+
+/* Fix specific text visibility issues */
+p, span, small, .card-text, .form-text, label {
+  color: var(--text-light) !important;
+}
+
+h1, h2, h3, h4, h5, h6, .card-title {
+  color: var(--text-primary) !important;
+}
+
+/* Fix input and select visibility */
+input, select, textarea {
+  color: var(--text-primary) !important;
+  background-color: rgba(30, 30, 30, 0.92) !important;
+}
+
+/* Fix dropdown menus */
+.dropdown-menu {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+}
+
+.dropdown-item {
+  color: var(--text-light);
+}
+
+.dropdown-item:hover {
+  background-color: rgba(255, 107, 61, 0.1);
+  color: var(--primary-color);
+}
+
+/* Ensure all backgrounds are properly dark */
+.bg-white,
+.bg-light {
+  background-color: var(--card-background) !important;
+}
+
+/* Card improvements for desktop */
+.card {
+  background: var(--card-background) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--border-radius-md) !important;
+}
+
+.card .card-header,
+.card .card-footer {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Fix navigation dropdown */
+.navbar-toggler {
+  border-color: var(--primary-color);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 107, 61, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.nav-icon-inline {
+  margin-right: 6px;
+  vertical-align: middle;
+}
+

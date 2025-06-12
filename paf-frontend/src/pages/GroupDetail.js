@@ -14,6 +14,9 @@ import {
   FaEllipsisH,
   FaUserCircle  // Added this import
 } from 'react-icons/fa';
+import '../styles/GroupDetail.css';
+import '../styles/group-rules-visibility-fix.css'; // Import the new group rules visibility CSS fix
+
 
 const GroupDetail = () => {
   const { groupId } = useParams();
@@ -65,7 +68,7 @@ const GroupDetail = () => {
       await fetchUsers([...new Set(userIds)]);
       
     } catch (err) {
-      console.error('Error:', err);
+      console.error('Error fetching group data:', err);
       setError('Failed to load group data. Please try again later.');
     } finally {
       setLoading(false);
@@ -103,7 +106,7 @@ const GroupDetail = () => {
         memberIds: updatedMembers
       }));
     } catch (err) {
-      console.error('Error', err);
+      console.error('Error joining group:', err);
       alert('Failed to join group. Please try again.');
     }
   };
@@ -111,7 +114,7 @@ const GroupDetail = () => {
   const handleLeaveGroup = async () => {
     if (!group || isCreator) return;
     
-    if (!window.confirm('Are you sure you want to leave this group? Y or N')) {
+    if (!window.confirm('Are you sure you want to leave this group?')) {
       return;
     }
     

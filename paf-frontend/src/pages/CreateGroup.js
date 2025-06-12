@@ -4,6 +4,7 @@ import { Container, Row, Col, Form, Button, Card, Alert, Spinner } from 'react-b
 import { AuthContext } from '../context/AuthContext';
 import { groupService } from '../api/apiService';
 import { FaSave, FaTimes, FaPlus, FaTrash } from 'react-icons/fa';
+import '../styles/CreateGroup.css';
 
 
 

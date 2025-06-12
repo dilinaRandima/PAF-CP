@@ -1,0 +1,177 @@
+/* =========== FULL WIDTH COMMENT SECTION FIX =========== */
+
+/* Remove all centering and max-width from feed page */
+.feed-background .container,
+.feed-background .container-fluid,
+.feed-background .row,
+.feed-background .col-lg-8,
+.feed-background .mx-auto {
+  max-width: none !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Recipe Card Full Width */
+.recipe-card {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Card Footer / Comment Section - Force Full Width */
+/*
+.recipe-card .card-footer,
+.recipe-card .comment-section,
+.card-footer.bg-white,
+.card-footer {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 1.5rem !important;
+  background-color: rgba(30, 30, 30, 0.95) !important;
+  border-top: 1px solid var(--border-color) !important;
+  border-radius: 0 0 var(--border-radius-md) var(--border-radius-md) !important;
+}
+*/
+
+/* Comments Container - Full Width */
+.comments-list,
+.comment-list,
+.mb-3:has(.comment) {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Individual Comments - Full Width */
+.comment,
+.comment-item,
+.d-flex.mb-2 {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-bottom: 1rem !important;
+  display: flex !important;
+  gap: 0.75rem !important;
+}
+
+/* Comment Form Container - Full Width */
+.comment-form-container,
+.d-flex.mt-3,
+.d-flex.align-items-center {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  margin-top: 1rem !important;
+  padding-top: 1rem !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  display: flex !important;
+  gap: 0.75rem !important;
+}
+
+/* Form Elements - Full Width */
+.comment-form-container .form-control,
+.comment-form-container input[type="text"],
+input#comment-input-\* {
+  flex: 1 !important;
+  width: auto !important;
+  background-color: rgba(40, 40, 40, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-primary) !important;
+  border-radius: 25px !important;
+  padding: 0.75rem 1.5rem !important;
+}
+
+/* Post Button */
+.comment-form-container .btn,
+.comment-form-container button,
+.post-button {
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 25px !important;
+  white-space: nowrap !important;
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+/* Avatar Styling */
+.fa-user-circle,
+.comment-avatar {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  border-radius: 50% !important;
+  background-color: var(--primary-color) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--background-dark) !important;
+  flex-shrink: 0 !important;
+}
+
+/* Comment Content Box */
+.bg-light.p-2.rounded,
+.comment-content,
+.comment-bubble {
+  flex: 1 !important;
+  background-color: rgba(40, 40, 40, 0.95) !important;
+  border-radius: 12px !important;
+  padding: 0.75rem 1rem !important;
+  color: var(--text-light) !important;
+}
+
+/* Override Bootstrap Flex Classes */
+.d-flex.flex-column {
+  flex-direction: column !important;
+  width: 100% !important;
+}
+
+/* Nuclear Options - Force Full Width on Everything */
+body .feed-background *,
+body .recipe-card * {
+  max-width: none !important;
+}
+
+body .feed-background .col-lg-8,
+body .recipe-card {
+  width: 100% !important;
+  max-width: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Remove any inline styles that might be centering */
+[style*="margin: 0 auto"],
+[style*="margin:0 auto"],
+[style*="margin-left: auto"],
+[style*="margin-right: auto"] {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Specific overrides for centered containers */
+.feed-background > .container > .row > .col-lg-8,
+.feed-background > .container > .py-4 > .row > .col-lg-8 {
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Fix any flex centering */
+.justify-content-center {
+  justify-content: flex-start !important;
+}
+
+/* Ensure vertical stacking */
+.card-footer > * {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+}  
