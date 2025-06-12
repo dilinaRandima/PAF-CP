@@ -2,7 +2,6 @@ package com.example.pafbackend.controllers;
 
 import com.example.pafbackend.models.Notification;
 import com.example.pafbackend.repositories.NotificationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +15,6 @@ public class NotificationController {
 
     private final NotificationRepository notificationRepository;
 
-    @Autowired
     public NotificationController(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
     }

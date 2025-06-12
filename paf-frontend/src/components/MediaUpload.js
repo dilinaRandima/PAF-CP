@@ -1,8 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Row, Col, Button, Alert, ProgressBar } from 'react-bootstrap';
-import { FaImage, FaVideo, FaYoutube, FaTimes, FaInfoCircle } from 'react-icons/fa';
+import { FaImage, FaVideo, FaYoutube, FaTimes, FaInfoCircle, FaUpload } from 'react-icons/fa';
+import { toast } from 'react-toastify';
+import { mediaService } from '../api/apiService';
+import { AuthContext } from '../context/AuthContext';
 
-const MediaUpload = ({ onChange, maxItems = 3 }) => {
+const MediaUpload = ({ onChange, maxItems = 3, initialItems = [] }) => {
+  const { currentUser } = React.useContext(AuthContext);
   const [mediaItems, setMediaItems] = useState([]);
   const [error, setError] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -10,20 +14,20 @@ const MediaUpload = ({ onChange, maxItems = 3 }) => {
   const fileInputRef = useRef(null);
   const youtubeInputRef = useRef(null);
   
-  // Clean up blob URLs when component unmounts or when media items change
+  // Initialize with initial items if provided
   useEffect(() => {
-    // When component unmounts, revoke any blob URLs to prevent memory leaks
-    return () => {
-      mediaItems.forEach(item => {
-        if (item.url && item.url.startsWith('blob:') && item.blobCreatedByUs) {
-          URL.revokeObjectURL(item.url);
-        }
-      });
-    };
-  }, []);
+    if (initialItems && initialItems.length > 0) {
+      setMediaItems(initialItems);
+    }
+  }, [initialItems]);
   
-  // Handle file selection
-  const handleFileSelect = (e) => {
+  // Call onChange whenever mediaItems changes
+  useEffect(() => {
+    onChange(mediaItems);
+  }, [mediaItems, onChange]);
+  
+  // Handle file selection and upload
+  const handleFileSelect = async (e) => {
     if (mediaItems.length >= maxItems) {
       setError(`Maximum ${maxItems} media items allowed`);
       return;
@@ -32,42 +36,85 @@ const MediaUpload = ({ onChange, maxItems = 3 }) => {
     const file = e.target.files[0];
     if (!file) return;
     
-    // Check if it's an image
-    if (file.type.startsWith('image/')) {
-      const blobUrl = URL.createObjectURL(file);
-      addMediaItem(file, blobUrl, file.type, true);
+    console.log("Selected file:", file.name, "type:", file.type, "size:", file.size);
+    
+    // Check file type
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+      setError('Only image and video files are supported');
+      return;
     }
-    // Check if it's a video
-    else if (file.type.startsWith('video/')) {
-      // Check video duration
+    
+    // Check video duration if it's a video
+    if (file.type.startsWith('video/')) {
       const video = document.createElement('video');
       video.preload = 'metadata';
       
       video.onloadedmetadata = () => {
-        window.URL.revokeObjectURL(video.src); // Clean up the temporary URL
-        if (video.duration > 30) {
+        window.URL.revokeObjectURL(video.src);
+        if (video.duration > 30) { // 30 seconds max
           setError('Videos must be 30 seconds or less');
-        } else {
-          const blobUrl = URL.createObjectURL(file);
-          addMediaItem(file, blobUrl, file.type, true);
+          return;
         }
+        // Upload the video if it's within the duration limit
+        uploadFile(file);
       };
       
       video.onerror = () => {
+        console.error("Error loading video metadata");
         setError('Error loading video. Please try another file.');
       };
       
       video.src = URL.createObjectURL(file);
     } else {
-      setError('Unsupported file type. Please upload an image or video.');
+      // Upload image directly
+      uploadFile(file);
     }
     
     // Reset the file input
     e.target.value = null;
   };
   
+  // Upload file to server using MediaService
+  const uploadFile = async (file) => {
+    try {
+      setUploading(true);
+      setUploadProgress(0);
+      setError(null);
+      
+      console.log("Starting upload for file:", file.name, "size:", file.size, "type:", file.type);
+      
+      // Upload file to MongoDB via our API
+      const response = await mediaService.uploadFile(
+        file, 
+        currentUser?.id, 
+        (progress) => setUploadProgress(progress)
+      );
+      
+      console.log("Upload successful, received data:", response.data);
+      
+      if (!response.data.url) {
+        throw new Error("Server didn't return a valid URL");
+      }
+      
+      // Add uploaded media to the list
+      addMediaItem(null, response.data.url, response.data.type, false, response.data.id);
+      
+      // Show success message
+      toast.success('File uploaded successfully!');
+      
+      setUploading(false);
+      setUploadProgress(100);
+      
+    } catch (error) {
+      console.error('Upload error:', error);
+      setError(`Failed to upload file: ${error.message}`);
+      toast.error('Upload failed. Please try again.');
+      setUploading(false);
+    }
+  };
+  
   // Handle YouTube link
-  const handleYoutubeLink = () => {
+  const handleYoutubeLink = async () => {
     if (mediaItems.length >= maxItems) {
       setError(`Maximum ${maxItems} media items allowed`);
       return;
@@ -82,20 +129,39 @@ const MediaUpload = ({ onChange, maxItems = 3 }) => {
       return;
     }
     
-    // Add YouTube URL as media item (not a blob, so no need for cleanup)
-    addMediaItem(null, youtubeUrl, 'youtube', false);
-    youtubeInputRef.current.value = '';
+    try {
+      setUploading(true);
+      
+      // Save YouTube URL to MongoDB
+      const response = await mediaService.saveExternalMedia({
+        url: youtubeUrl,
+        contentType: 'video/youtube',
+        userId: currentUser?.id
+      });
+      
+      // Add YouTube URL as media item
+      addMediaItem(null, response.data.url, 'video/youtube', false, response.data.id);
+      youtubeInputRef.current.value = '';
+      
+      toast.success('YouTube video added');
+    } catch (error) {
+      console.error('Error saving YouTube URL:', error);
+      setError(`Failed to save YouTube URL: ${error.message}`);
+      toast.error('Failed to add YouTube video. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
   
   // Add a media item to the list
-  const addMediaItem = (file, url, type, blobCreatedByUs = false) => {
+  const addMediaItem = (file, url, type, blobCreatedByUs = false, id = null) => {
     // Check if the URL already exists to prevent duplicates
     if (mediaItems.some(item => item.url === url)) {
       setError("This media has already been added");
       return;
     }
     
-    const newItem = { file, url, type, id: Date.now(), blobCreatedByUs };
+    const newItem = { file, url, type, id: id || Date.now(), mediaId: id, blobCreatedByUs };
     const updatedItems = [...mediaItems, newItem];
     setMediaItems(updatedItems);
     setError(null);
@@ -120,7 +186,8 @@ const MediaUpload = ({ onChange, maxItems = 3 }) => {
   
   // Helper to get media item preview
   const getMediaPreview = (item) => {
-    if (item.type === 'youtube') {
+    // For YouTube videos
+    if (item.type === 'video/youtube' || item.url.includes('youtube.com') || item.url.includes('youtu.be')) {
       // Extract video ID from YouTube URL
       let videoId = '';
       
@@ -161,21 +228,39 @@ const MediaUpload = ({ onChange, maxItems = 3 }) => {
         console.error("Error parsing YouTube URL:", error);
         return <div className="alert alert-warning">Error parsing YouTube URL</div>;
       }
-    } else if (item.type.startsWith('image/')) {
+    } 
+    // For images
+    else if (item.type.startsWith('image/') || item.url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
       return (
         <div className="image-preview">
           <img 
             src={item.url} 
             className="img-fluid rounded" 
             alt="Preview" 
-            onError={() => console.error("Error loading image:", item.url)}
+            loading="lazy"
+            onError={(e) => {
+              console.error("Error loading image:", item.url);
+              e.target.src = '/images/placeholder-image.png';
+            }}
           />
         </div>
       );
-    } else if (item.type.startsWith('video/')) {
+    } 
+    // For videos
+    else if (item.type.startsWith('video/') || item.url.match(/\.(mp4|mov|avi|wmv|webm)$/i)) {
       return (
         <div className="video-preview">
-          <video className="w-100 rounded" controls>
+          <video 
+            className="w-100 rounded" 
+            controls 
+            muted 
+            playsInline
+            preload="metadata"
+            onError={(e) => {
+              console.error("Error loading video:", item.url);
+              e.target.parentElement.innerHTML = '<div class="alert alert-warning">Video could not be loaded</div>';
+            }}
+          >
             <source src={item.url} type={item.type} />
             Your browser does not support the video tag.
           </video>
@@ -188,7 +273,7 @@ const MediaUpload = ({ onChange, maxItems = 3 }) => {
   
   return (
     <div className="media-upload mb-4">
-      {error && <Alert variant="danger">{error}</Alert>}
+      {error && <Alert variant="danger" onClose={() => setError(null)} dismissible>{error}</Alert>}
       
       {/* Media preview */}
       {mediaItems.length > 0 && (
@@ -219,8 +304,17 @@ const MediaUpload = ({ onChange, maxItems = 3 }) => {
               variant="outline-primary"
               onClick={() => fileInputRef.current.click()}
               className="w-100"
+              disabled={uploading}
             >
-              <FaImage className="me-2" /> Add Photo/Video
+              {uploading ? (
+                <>
+                  <FaUpload className="me-2" /> Uploading...
+                </>
+              ) : (
+                <>
+                  <FaImage className="me-2" /> Add Photo/Video
+                </>
+              )}
             </Button>
             <input
               type="file"
@@ -239,7 +333,11 @@ const MediaUpload = ({ onChange, maxItems = 3 }) => {
                 placeholder="YouTube URL"
                 ref={youtubeInputRef}
               />
-              <Button variant="outline-secondary" onClick={handleYoutubeLink}>
+              <Button 
+                variant="outline-secondary" 
+                onClick={handleYoutubeLink}
+                disabled={uploading}
+              >
                 <FaYoutube /> Add
               </Button>
             </div>
@@ -253,7 +351,7 @@ const MediaUpload = ({ onChange, maxItems = 3 }) => {
       
       <div className="mt-2 text-muted small">
         <FaInfoCircle className="me-1" /> 
-        Add up to {maxItems} photos or videos. Videos must be 30 seconds or less.
+        Add up to {maxItems} photos or videos. Videos must be 30 seconds or less. No file size limit.
       </div>
     </div>
   );

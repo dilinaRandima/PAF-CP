@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 import { FaGoogle, FaUtensils, FaEnvelope, FaLock } from 'react-icons/fa';
-import '../App.css';
+import '../styles/Login.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');

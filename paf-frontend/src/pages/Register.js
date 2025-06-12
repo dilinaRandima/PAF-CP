@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 import { FaGoogle, FaUtensils, FaUser, FaLock, FaEnvelope } from 'react-icons/fa';
+import '../styles/Register.css';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -65,7 +66,7 @@ const Register = () => {
       const result = await register(userData);
       
       if (result.success) {
-        navigate('/feed');
+        navigate('/login');
       } else {
         setError(result.message || 'Registration failed. Please try again.');
       }
