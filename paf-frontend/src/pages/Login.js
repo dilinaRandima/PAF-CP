@@ -155,6 +155,110 @@ const Login = () => {
           </Col>
         </Row>
       </Container>
+
+      {/* Add custom styles for the Login page */}
+      <style jsx>{`
+        .auth-page {
+          background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                            url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+          background-size: cover;
+          background-position: center;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .app-logo {
+          margin-bottom: 2rem;
+        }
+        
+        .auth-card {
+          border: none;
+          border-radius: 15px;
+          box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+          background-color: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+        }
+        
+        .auth-title {
+          color: var(--primary-dark);
+          font-size: 2rem;
+          font-weight: 700;
+          text-align: center;
+          margin-bottom: 1.5rem;
+          font-family: 'Playfair Display', serif;
+        }
+        
+        .divider {
+          display: flex;
+          align-items: center;
+          color: var(--text-secondary);
+        }
+        
+        .divider::before,
+        .divider::after {
+          content: "";
+          flex: 1;
+          height: 1px;
+          background-color: var(--neutral-medium);
+        }
+        
+        .divider span {
+          padding: 0 1rem;
+        }
+        
+        .input-icon {
+          position: absolute;
+          left: 15px;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 10;
+        }
+        
+        .forgot-password {
+          font-size: 0.9rem;
+          text-decoration: none;
+          transition: all 0.3s ease;
+        }
+        
+        .forgot-password:hover {
+          text-decoration: underline;
+        }
+        
+        /* Animation for error message */
+        @keyframes headShake {
+          0% {
+            transform: translateX(0);
+          }
+          6.5% {
+            transform: translateX(-6px) rotateY(-9deg);
+          }
+          18.5% {
+            transform: translateX(5px) rotateY(7deg);
+          }
+          31.5% {
+            transform: translateX(-3px) rotateY(-5deg);
+          }
+          43.5% {
+            transform: translateX(2px) rotateY(3deg);
+          }
+          50% {
+            transform: translateX(0);
+          }
+        }
+        
+        .animate__headShake {
+          animation-name: headShake;
+          animation-duration: 0.8s;
+          animation-timing-function: ease-in-out;
+        }
+        
+        .animate__animated {
+          animation-duration: 1s;
+          animation-fill-mode: both;
+        }
+      `}</style>
     </div>
   );
 };

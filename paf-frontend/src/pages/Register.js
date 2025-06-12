@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 import { FaGoogle, FaUtensils, FaUser, FaLock, FaEnvelope } from 'react-icons/fa';
 import '../styles/Register.css';
+
 const Register = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -104,83 +105,53 @@ const Register = () => {
                 )}
                 
                 <Form onSubmit={handleSubmit}>
-                  <Form.Group className="mb-4">
-                    <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-                      <span style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        height: '100%',
-                        marginLeft: '12px',
-                        marginRight: '8px',
-                        color: '#bdbdbd',
-                        fontSize: '1.2em'
-                      }}>
-                        <FaEnvelope className="text-primary" />
-                      </span>
-                      <Form.Control
-                        type="email"
-                        name="email"
-                        placeholder="Email address"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        style={{ flex: 1 }}
-                      />
+                  <Form.Group className="mb-4 position-relative">
+                    <div className="input-icon">
+                      <FaEnvelope className="text-primary" />
                     </div>
+                    <Form.Control
+                      type="email" 
+                      name="email"
+                      placeholder="Email address"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="ps-5"
+                    />
                   </Form.Group>
 
-                  <Form.Group className="mb-4">
-                    <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-                      <span style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        height: '100%',
-                        marginLeft: '12px',
-                        marginRight: '8px',
-                        color: '#bdbdbd',
-                        fontSize: '1.2em'
-                      }}>
-                        <FaLock className="text-primary" />
-                      </span>
-                      <Form.Control
-                        type="password"
-                        name="password"
-                        placeholder="Create a password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                        minLength={6}
-                        style={{ flex: 1 }}
-                      />
+                  <Form.Group className="mb-4 position-relative">
+                    <div className="input-icon">
+                      <FaLock className="text-primary" />
                     </div>
+                    <Form.Control 
+                      type="password" 
+                      name="password"
+                      placeholder="Create a password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      minLength={6}
+                      className="ps-5"
+                    />
                     <Form.Text className="text-muted">
                       Password must be at least 6 characters long
                     </Form.Text>
                   </Form.Group>
 
-                  <Form.Group className="mb-4">
-                    <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-                      <span style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        height: '100%',
-                        marginLeft: '12px',
-                        marginRight: '8px',
-                        color: '#bdbdbd',
-                        fontSize: '1.2em'
-                      }}>
-                        <FaLock className="text-primary" />
-                      </span>
-                      <Form.Control
-                        type="password"
-                        name="confirmPassword"
-                        placeholder="Confirm your password"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        required
-                        style={{ flex: 1 }}
-                      />
+                  <Form.Group className="mb-4 position-relative">
+                    <div className="input-icon">
+                      <FaLock className="text-primary" />
                     </div>
+                    <Form.Control 
+                      type="password" 
+                      name="confirmPassword"
+                      placeholder="Confirm your password"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      required
+                      className="ps-5"
+                    />
                   </Form.Group>
 
                   <Button 
@@ -223,6 +194,100 @@ const Register = () => {
           </Col>
         </Row>
       </Container>
+
+      {/* Add custom styles for the Register page */}
+      <style jsx>{`
+        .auth-page {
+          background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                            url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+          background-size: cover;
+          background-position: center;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .app-logo {
+          margin-bottom: 2rem;
+        }
+        
+        .auth-card {
+          border: none;
+          border-radius: 15px;
+          box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+          background-color: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+        }
+        
+        .auth-title {
+          color: var(--primary-dark);
+          font-size: 2rem;
+          font-weight: 700;
+          text-align: center;
+          margin-bottom: 1.5rem;
+          font-family: 'Playfair Display', serif;
+        }
+        
+        .divider {
+          display: flex;
+          align-items: center;
+          color: var(--text-secondary);
+        }
+        
+        .divider::before,
+        .divider::after {
+          content: "";
+          flex: 1;
+          height: 1px;
+          background-color: var(--neutral-medium);
+        }
+        
+        .divider span {
+          padding: 0 1rem;
+        }
+        
+        .input-icon {
+          position: absolute;
+          left: 15px;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 10;
+        }
+        
+        /* Animation for error message */
+        @keyframes headShake {
+          0% {
+            transform: translateX(0);
+          }
+          6.5% {
+            transform: translateX(-6px) rotateY(-9deg);
+          }
+          18.5% {
+            transform: translateX(5px) rotateY(7deg);
+          }
+          31.5% {
+            transform: translateX(-3px) rotateY(-5deg);
+          }
+          43.5% {
+            transform: translateX(2px) rotateY(3deg);
+          }
+          50% {
+            transform: translateX(0);
+          }
+        }
+        
+        .animate__headShake {
+          animation-name: headShake;
+          animation-duration: 0.8s;
+          animation-timing-function: ease-in-out;
+        }
+        
+        .animate__animated {
+          animation-duration: 1s;
+          animation-fill-mode: both;
+        }
+      `}</style>
     </div>
   );
 };

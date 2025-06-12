@@ -34,6 +34,44 @@ const formatTimeAgo = (dateString) => {
   return `${years} year${years > 1 ? 's' : ''} ago`;
 };
 
+const LoadingSkeletons = () => {
+  return (
+      <>
+        {[1, 2, 3].map(i => (
+            <Card key={i} className="custom-card mb-4">
+              <Card.Header className="bg-white">
+                <div className="d-flex align-items-center">
+                  <div className="bg-secondary opacity-25 rounded-circle me-2" style={{width: 40, height: 40}}></div>
+                  <div className="flex-grow-1">
+                    <div className="bg-secondary opacity-25" style={{width: '60%', height: 16, borderRadius: 4}}></div>
+                    <div className="bg-secondary opacity-25 mt-1" style={{width: '30%', height: 12, borderRadius: 4}}></div>
+                  </div>
+                </div>
+              </Card.Header>
+              <Card.Body>
+                <div className="bg-secondary opacity-25 mb-3" style={{width: '40%', height: 24, borderRadius: 4}}></div>
+                {/* Added badges skeletons */}
+                <div className="d-flex mb-3">
+                  <div className="bg-secondary opacity-25 me-2" style={{width: '10%', height: 20, borderRadius: 16}}></div>
+                  <div className="bg-secondary opacity-25 me-2" style={{width: '15%', height: 20, borderRadius: 16}}></div>
+                  <div className="bg-secondary opacity-25" style={{width: '20%', height: 20, borderRadius: 16}}></div>
+                </div>
+                <div className="bg-secondary opacity-25 mb-3" style={{width: '100%', height: 200, borderRadius: 4}}></div>
+                <div className="bg-secondary opacity-25 mb-2" style={{width: '100%', height: 16, borderRadius: 4}}></div>
+                <div className="bg-secondary opacity-25" style={{width: '80%', height: 16, borderRadius: 4}}></div>
+                {/* Added interaction buttons skeleton */}
+                <div className="d-flex mt-3">
+                  <div className="bg-secondary opacity-25 me-3" style={{width: '8%', height: 20, borderRadius: 4}}></div>
+                  <div className="bg-secondary opacity-25 me-3" style={{width: '8%', height: 20, borderRadius: 4}}></div>
+                  <div className="bg-secondary opacity-25" style={{width: '10%', height: 20, borderRadius: 4}}></div>
+                </div>
+              </Card.Body>
+            </Card>
+        ))}
+      </>
+  );
+};
+
 const Feed = () => {
   const { currentUser } = useContext(AuthContext);
   const [posts, setPosts] = useState([]);
@@ -67,6 +105,25 @@ const Feed = () => {
 
   useEffect(() => {
     fetchPosts();
+
+    // Add CSS for comment highlight animation
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .comment-highlight {
+        animation: highlightComment 3s ease;
+      }
+      
+      @keyframes highlightComment {
+        0% { background-color: rgba(255, 255, 0, 0.3); }
+        100% { background-color: transparent; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Clean up style on unmount
+    return () => {
+      document.head.removeChild(style);
+    };
   }, []);
 
   // Debug logging for media URLs
@@ -83,7 +140,7 @@ const Feed = () => {
     });
   }, [posts]);
 
-  // Add useEffect to load user's bookmarks when component mounts
+  // Add load bookmarks on mount
   useEffect(() => {
     const fetchUserBookmarks = async () => {
       try {
@@ -282,7 +339,7 @@ const Feed = () => {
     try {
       setSubmittingPost(true);
       
-      // Create arrays from media items
+      // organize media itemss into arrays
       const mediaLinks = mediaItems.map(item => item.url);
       const mediaTypes = mediaItems.map(item => item.type);
       
@@ -303,10 +360,10 @@ const Feed = () => {
       const response = await postService.createPost(postData);
       const createdPost = response.data;
       
-      // Update posts list with the new post
+      // Update state with the latest post
       setPosts(prev => [createdPost, ...prev]);
       
-      // Clear the form
+      // Reset the form field
       setNewPost({ 
         title: '', 
         contentDescription: '', 
@@ -518,6 +575,21 @@ const Feed = () => {
         }
       }));
       
+      // Mark comment as newly added
+      setNewlyAddedComments(prev => ({
+        ...prev,
+        [createdComment.id]: true
+      }));
+      
+      // Remove the highlight after 3 seconds
+      setTimeout(() => {
+        setNewlyAddedComments(prev => {
+          const updated = {...prev};
+          delete updated[createdComment.id];
+          return updated;
+        });
+      }, 3000);
+      
       // Clear the comment input
       setNewComment(prev => ({
         ...prev,
@@ -546,7 +618,18 @@ const Feed = () => {
         }
       }
       
+      // Add toast notification
       toast.success('Comment posted successfully!');
+      
+      // Update unread comment counts for other users
+      const updatedCount = (comments[postId] || []).length + 1;
+      if (lastViewedCommentCounts[postId] !== undefined) {
+        setUnreadCommentCounts(prev => ({
+          ...prev,
+          [postId]: Math.max(0, updatedCount - lastViewedCommentCounts[postId])
+        }));
+      }
+      
     } catch (err) {
       console.error('Error creating comment:', err);
       console.error('Error details:', err.response?.data || err.message);
@@ -602,6 +685,12 @@ const Feed = () => {
       // Use updateComment API method
       await commentService.updateComment(editingComment.id, editingComment.text);
       
+      // Mark comment as edited
+      setEditedComments(prev => ({
+        ...prev,
+        [editingComment.id]: true
+      }));
+      
       // Update comments state
       setComments(prev => ({
         ...prev,
@@ -612,8 +701,11 @@ const Feed = () => {
         )
       }));
       
-      setEditingComment({ id: null, postId: null, text: '' });
-      toast.success('Comment updated successfully');
+      setEditingComment({ id: null, text: '' });
+      
+      // Add toast notification
+      toast.success('Comment updated successfully!');
+      
     } catch (err) {
       console.error('Error updating comment:', err);
       toast.error('Failed to update comment. Please try again.');
@@ -641,8 +733,10 @@ const Feed = () => {
           ...prev,
           [postId]: prev[postId].filter(like => like.id !== userLike.id)
         }));
+        toast.info('Post unliked');
       } catch (err) {
         console.error('Error removing like:', err);
+        toast.error('Failed to unlike the post. Please try again.');
       }
     } else {
       // User hasn't liked the post, so like it
@@ -681,8 +775,10 @@ const Feed = () => {
             // Continue even if notification fails
           }
         }
+        toast.success('Post liked!');
       } catch (err) {
         console.error('Error adding like:', err);
+        toast.error('Failed to like the post. Please try again.');
       }
     }
   };
@@ -1126,7 +1222,18 @@ const Feed = () => {
                             disabled={submittingComment || !newComment[post.id]}
                             onClick={() => handleNewCommentSubmit(post.id)}
                           >
-                            Post
+                            {/*{submittingComment ? 'Posting...' : 'Post'}*/}
+
+                            {/* WITH THIS */}
+                            {submittingComment ? (
+                                <>
+                                  <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-1" />
+                                  Posting...
+                                </>
+                            ) : (
+                                'Post'
+                            )}
+
                           </Button>
                         </Form>
                       </div>
@@ -1291,6 +1398,8 @@ const Feed = () => {
       </Container>
     </div>
   );
+  
 };
+
 
 export default Feed;
