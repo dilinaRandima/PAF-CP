@@ -31,7 +31,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import com.example.pafbackend.repositories.UserRepository;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
@@ -58,12 +57,6 @@ public class SecurityConfig {
     UserDetailsManager userDetailsManager;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private TokenGenerator tokenGenerator;
-
-    @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
 
     @Bean
@@ -88,7 +81,7 @@ public class SecurityConfig {
                         authorizationRequestResolver(clientRegistrationRepository)
                     )
                 )
-                .successHandler(new GoogleOAuthSuccessHandler(userRepository, tokenGenerator))
+                .successHandler(new GoogleOAuthSuccessHandler())
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -135,33 +128,48 @@ public class SecurityConfig {
     @Bean
     @Primary
     JwtDecoder jwtAccessTokenDecoder(){
-        return NimbusJwtDecoder.withPublicKey(keyUtils.getAccessTokenPublicKey()).build();
+        try {
+            return NimbusJwtDecoder.withPublicKey(KeyUtils.getAccessTokenPublicKey()).build();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load access token public key", e);
+        }
     }
 
     @Bean
     @Primary
     JwtEncoder jwtAccessTokenEncoder(){
-        JWK jwk = new RSAKey.Builder(keyUtils.getAccessTokenPublicKey()).privateKey(keyUtils.getAccessTokenPrivateKey()).build();
-
-        JWKSource<SecurityContext> jwkSource = new ImmutableJWKSet<>(new JWKSet(jwk));
-        return new NimbusJwtEncoder(jwkSource);
+        try {
+            JWK jwk = new RSAKey.Builder(KeyUtils.getAccessTokenPublicKey()).privateKey(KeyUtils.getAccessTokenPrivateKey()).build();
+            JWKSource<SecurityContext> jwkSource = new ImmutableJWKSet<>(new JWKSet(jwk));
+            return new NimbusJwtEncoder(jwkSource);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load access token keys", e);
+        }
     }
 
     @Bean
     @Qualifier("jwtRefreshTokenDecoder")
     JwtDecoder jwtRefreshTokenDecoder() {
-        return NimbusJwtDecoder.withPublicKey(keyUtils.getRefreshTokenPublicKey()).build();
+        try {
+            return NimbusJwtDecoder.withPublicKey(KeyUtils.getRefreshTokenPublicKey()).build();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load refresh token public key", e);
+        }
     }
 
     @Bean
     @Qualifier("jwtRefreshTokenEncoder")
     JwtEncoder jwtRefreshTokenEncoder() {
-        JWK jwk = new RSAKey
-                .Builder(keyUtils.getRefreshTokenPublicKey())
-                .privateKey(keyUtils.getRefreshTokenPrivateKey())
-                .build();
-        JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
-        return new NimbusJwtEncoder(jwks);
+        try {
+            JWK jwk = new RSAKey
+                    .Builder(KeyUtils.getRefreshTokenPublicKey())
+                    .privateKey(KeyUtils.getRefreshTokenPrivateKey())
+                    .build();
+            JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
+            return new NimbusJwtEncoder(jwks);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load refresh token keys", e);
+        }
     }
 
     @Bean
