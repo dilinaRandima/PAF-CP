@@ -12,26 +12,30 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
+import com.example.pafbackend.repositories.UserRepository;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
 import java.util.List;
 
@@ -40,12 +44,6 @@ import java.util.List;
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 @Slf4j
 public class SecurityConfig {
-
-    @Autowired
-    private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-    
-    @Autowired
-    private GoogleOAuthSuccessHandler googleOAuthSuccessHandler;
 
     @Autowired
     JwtToUserConverter jwtToUserConverter;
@@ -59,25 +57,67 @@ public class SecurityConfig {
     @Autowired
     UserDetailsManager userDetailsManager;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private TokenGenerator tokenGenerator;
+
+    @Autowired
+    private ClientRegistrationRepository clientRegistrationRepository;
+
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-        return http
-                .cors(cors->cors.configurationSource(corsConfiguration()))
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/api/auth/register", "/api/auth/login", "/api/users/**", 
-                                         "/oauth2/**", "/login/**").permitAll();
-                    auth.anyRequest().authenticated();
-                })
-                .oauth2Login(oauth2 -> oauth2
-                    .loginPage("/login")
-                    .defaultSuccessUrl("/oauth2/authorization/google")
-                    .successHandler(googleOAuthSuccessHandler)
+    public AuthenticationManager authenticationManager() {
+        return new ProviderManager(daoAuthenticationProvider());
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configure(http))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**", "/oauth2/**", "/login/**").permitAll()
+                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/api/media/**", "/api/uploads/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .authorizationEndpoint(auth -> auth
+                    .authorizationRequestResolver(
+                        authorizationRequestResolver(clientRegistrationRepository)
+                    )
                 )
-                .oauth2ResourceServer
-                        ((oauth2)->oauth2.jwt((jwt)->jwt.jwtAuthenticationConverter(jwtToUserConverter)))
-                .sessionManagement((session)->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .build();
+                .successHandler(new GoogleOAuthSuccessHandler(userRepository, tokenGenerator))
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(jwt -> jwt
+                    .jwtAuthenticationConverter(jwtAuthenticationConverter())
+                )
+            );
+
+        return http.build();
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        authoritiesConverter.setAuthoritiesClaimName("roles");
+        authoritiesConverter.setAuthorityPrefix("ROLE_");
+        converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+        return converter;
+    }
+
+    private OAuth2AuthorizationRequestResolver authorizationRequestResolver(
+            ClientRegistrationRepository clientRegistrationRepository) {
+        return new DefaultOAuth2AuthorizationRequestResolver(
+                clientRegistrationRepository,
+                "/oauth2/authorization"
+        );
     }
 
     @Bean

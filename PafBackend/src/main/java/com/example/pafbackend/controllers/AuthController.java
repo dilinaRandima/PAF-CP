@@ -1,84 +1,63 @@
 package com.example.pafbackend.controllers;
 
-
-import com.example.pafbackend.config.TokenGenerator;
-import com.example.pafbackend.dto.LoginDTO;
-import com.example.pafbackend.dto.SignupDTO;
+import com.example.pafbackend.dto.LoginRequest;
+import com.example.pafbackend.dto.RegisterRequest;
+import com.example.pafbackend.dto.TokenDTO;
 import com.example.pafbackend.models.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
+import com.example.pafbackend.repositories.UserRepository;
+import com.example.pafbackend.config.TokenGenerator;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:3000")
+@RequiredArgsConstructor
 public class AuthController {
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    @Autowired
-    UserDetailsManager userDetailsManager;
 
-    @Autowired
-    TokenGenerator tokenGenerator;
-
-    @Autowired
-    DaoAuthenticationProvider daoAuthenticationProvider;
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final TokenGenerator tokenGenerator;
 
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody SignupDTO signupDTO){
-        try {
-            User user = new User();
-            user.setUsername(signupDTO.getUsername());
-            user.setPassword(signupDTO.getPassword());
-            userDetailsManager.createUser(user);
-
-            Authentication authentication = UsernamePasswordAuthenticationToken.authenticated(user, signupDTO.getPassword(), Collections.EMPTY_LIST);
-            return ResponseEntity.ok(tokenGenerator.createToken(authentication));
-        }catch (UsernameNotFoundException ex) {
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: Username not found!");
-        } catch (BadCredentialsException ex) {
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: Bad credentials!");
-        } catch (DataIntegrityViolationException ex) {
-
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error: Username may already exist!");
-        } catch (Exception ex) {
-
-            return ResponseEntity.internalServerError().body("Error: An unexpected error occurred. Please try again later.");
+    public ResponseEntity<TokenDTO> register(@RequestBody RegisterRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            return ResponseEntity.badRequest().build();
         }
+
+        User user = new User();
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole("USER");
+        user.setCreatedAt(new java.util.Date());
+        userRepository.save(user);
+
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+        );
+
+        List<GrantedAuthority> authorities = new ArrayList<>(user.getAuthorities());
+        return ResponseEntity.ok(tokenGenerator.createToken(authentication, authorities));
     }
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody LoginDTO loginDTO) {
-        try {
-            logger.info("====== Login method called to "+loginDTO.getUsername());
-            try{
-                Authentication authentication = daoAuthenticationProvider.authenticate(
-                        UsernamePasswordAuthenticationToken.unauthenticated(loginDTO.getUsername(), loginDTO.getPassword())
-                );
-                return ResponseEntity.ok(tokenGenerator.createToken(authentication));
-            }catch (Exception ex) {
-                logger.error(ex.getMessage());
-                return ResponseEntity.internalServerError().body("Error: An unexpected error occurred. Please try again later.");
-            }
-        } catch (AuthenticationException ex) {
-            throw new BadCredentialsException("Invalid username or password", ex);
-        }catch (Exception ex) {
-            return ResponseEntity.internalServerError().body("Error: An unexpected error occurred. Please try again later.");
-        }
+    public ResponseEntity<TokenDTO> login(@RequestBody LoginRequest request) {
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+        );
+
+        User user = (User) authentication.getPrincipal();
+        List<GrantedAuthority> authorities = new ArrayList<>(user.getAuthorities());
+        return ResponseEntity.ok(tokenGenerator.createToken(authentication, authorities));
     }
 }

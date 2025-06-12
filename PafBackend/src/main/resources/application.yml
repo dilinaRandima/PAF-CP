@@ -13,8 +13,8 @@ spring:
     active: dev
   data:
     mongodb:
-      uri: mongodb+srv://cooking-app-user:ranidu123@cooking-app-cluster.6f2l0rg.mongodb.net/?retryWrites=true&w=majority&appName=cooking-app-cluster
-      database: ${MONGODB_DB:myFirstDatabase}
+     uri: mongodb+srv://cooking-app-user:ranidu123@cooking-app-cluster.6f2l0rg.mongodb.net/?retryWrites=true&w=majority&appName=cooking-app-cluster
+     database: ${MONGODB_DB:myFirstDatabase}
   security:
     oauth2:
       client:
@@ -34,10 +34,19 @@ spring:
             user-name-attribute: email
   servlet:
     multipart:
-      max-file-size: 50MB
-      max-request-size: 50MB
+      max-file-size: 100MB
+      max-request-size: 100MB
+      enabled: true
+  web:
+    resources:
+      static-locations: classpath:/static/, file:${file.upload-dir:uploads/}
+      
 logging:
   level:
     org.springframework.security: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation: TRACE
+    org.springframework.web: DEBUG
+    org.springframework.web.cors: DEBUG
+    
 file:
   upload-dir: uploads

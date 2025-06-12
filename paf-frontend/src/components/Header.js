@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Navbar, Nav, Container, Button, Dropdown } from 'react-bootstrap';
-import { FaUser, FaBell, FaCog, FaSignOutAlt, FaBookmark, FaUsers } from 'react-icons/fa';
+import { Navbar, Nav, Container, Dropdown } from 'react-bootstrap';
+import { FaBell, FaUser, FaBookmark, FaUsers, FaHome, FaStream, FaListAlt, FaUtensils } from 'react-icons/fa';
 import { AuthContext } from '../context/AuthContext';
 import { notificationService } from '../api/apiService';
 
@@ -9,6 +9,7 @@ const Header = () => {
   const { currentUser, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   const isActive = (path) => {
     return location.pathname === path ? 'active' : '';
@@ -18,118 +19,132 @@ const Header = () => {
     logout();
     navigate('/login');
   };
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
-// Add useEffect to fetch notification count
-useEffect(() => {
-  if (currentUser) {
-    const fetchNotificationCount = async () => {
-      try {
-        const response = await notificationService.getUnreadNotifications(currentUser.id);
-        setUnreadNotifications(response.data.length);
-      } catch (err) {
-        console.error('Error fetching notifications:', err);
-      }
-    };
-    
-    fetchNotificationCount();
-    
-    // Set up interval to check for new notifications
-    const interval = setInterval(fetchNotificationCount, 60000); // Check every minute
-    
-    return () => clearInterval(interval);
-  }
-}, [currentUser]);
-
+  useEffect(() => {
+    if (currentUser) {
+      const fetchNotificationCount = async () => {
+        try {
+          const response = await notificationService.getUnreadNotifications(currentUser.id);
+          setUnreadNotifications(response.data.length);
+        } catch (err) {
+          console.error('Error fetching notifications:', err);
+        }
+      };
+      
+      fetchNotificationCount();
+      const interval = setInterval(fetchNotificationCount, 60000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [currentUser]);
 
   return (
-    <Navbar bg="light" expand="lg" className="header">
+    <header className="header">
       <Container>
-        <Navbar.Brand as={Link} to="/">
-          <strong>CookBook</strong>
-        </Navbar.Brand>
-        
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        
-        <Navbar.Collapse id="basic-navbar-nav">
-          {currentUser ? (
-            <>
-              <Nav className="me-auto">
+        <Navbar expand="lg" className="navbar">
+          <Navbar.Brand as={Link} to="/" className="navbar-brand">
+            <FaUtensils className="brand-icon" />
+            Cookbook
+          </Navbar.Brand>
+          
+          <Navbar.Toggle aria-controls="navbar-nav" />
+          
+          <Navbar.Collapse id="navbar-nav">
+            <Nav className="mx-auto">
+              <Nav.Link 
+                as={Link} 
+                to="/" 
+                className={`nav-link ${isActive('/')}`}
+              >
+                <FaHome className="nav-icon-inline" size={16} /> Home
+              </Nav.Link>
+              {/* Show Recipes only if logged in */}
+              {currentUser && (
                 <Nav.Link 
                   as={Link} 
                   to="/feed" 
                   className={`nav-link ${isActive('/feed')}`}
                 >
-                  Feed
+                  <FaStream className="nav-icon-inline" size={16} /> Feeds
                 </Nav.Link>
-                
-                <Nav.Link 
-  as={Link} 
-  to="/bookmarks" 
-  className={`nav-link ${isActive('/bookmarks')}`}
->
-  <FaBookmark className="me-1" /> Bookmarks
-</Nav.Link>
-<Nav.Link 
-  as={Link} 
-  to="/groups" 
-  className={`nav-link ${isActive('/groups')}`}
->
-  <FaUsers className="me-1" /> Communities
-</Nav.Link>
-              </Nav>
-
-              
-              <Nav>
-              <Nav.Link as={Link} to="/notifications">
-  <div className="position-relative">
-    <FaBell size={18} />
-    {unreadNotifications > 0 && (
-      <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-        {unreadNotifications > 9 ? '9+' : unreadNotifications}
-      </span>
-    )}
-  </div>
-</Nav.Link>
-                
-                <Dropdown align="end">
-                  <Dropdown.Toggle as="a" className="nav-link" id="user-dropdown">
-                    <FaUser size={18} />
-                  </Dropdown.Toggle>
+              )}
+              {currentUser && (
+                <>
+                  <Nav.Link 
+                    as={Link} 
+                    to="/my-recipes" 
+                    className={`nav-link ${isActive('/my-recipes')}`}
+                  >
+                    <FaListAlt className="nav-icon-inline" size={16} /> My Feeds
+                  </Nav.Link>
                   
-                  <Dropdown.Menu>
-                    <Dropdown.Item as={Link} to={`/profile/${currentUser.id}`}>
-                      <FaUser className="me-2" /> My Profile
-                    </Dropdown.Item>
-                    <Dropdown.Item as={Link} to="/edit-profile">
-                      <FaCog className="me-2" /> Edit Profile
-                    </Dropdown.Item>
-                    <Dropdown.Divider />
-                    <Dropdown.Item onClick={handleLogout}>
-                      <FaSignOutAlt className="me-2" /> Logout
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-              </Nav>
-            </>
-          ) : (
-            <Nav className="ms-auto">
-              <Nav.Link as={Link} to="/login" className={`nav-link ${isActive('/login')}`}>
-                Login
-              </Nav.Link>
-              <Button 
-                as={Link} 
-                to="/register" 
-                variant="primary"
-                className="ms-2"
-              >
-                Register
-              </Button>
+                  <Nav.Link 
+                    as={Link} 
+                    to="/bookmarks" 
+                    className={`nav-link ${isActive('/bookmarks')}`}
+                  >
+                    <FaBookmark className="nav-icon-inline" size={16} />
+                    Bookmarks
+                  </Nav.Link>
+                  
+                  <Nav.Link 
+                    as={Link} 
+                    to="/groups" 
+                    className={`nav-link ${isActive('/groups')}`}
+                  >
+                    <FaUsers className="nav-icon-inline" size={16} />
+                    Communities
+                  </Nav.Link>
+                </>
+              )}
             </Nav>
-          )}
-        </Navbar.Collapse>
+            
+            <Nav className="ms-auto align-items-center nav-icons">
+              {currentUser ? (
+                <>
+                  <Link to="/notifications" className="nav-icon position-relative me-3">
+                    <FaBell />
+                    {unreadNotifications > 0 && (
+                      <span className="notification-badge">
+                        {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                      </span>
+                    )}
+                  </Link>
+                  
+                  <Dropdown align="end">
+                    <Dropdown.Toggle as="div" className="nav-icon" id="user-dropdown">
+                      <FaUser />
+                    </Dropdown.Toggle>
+                    
+                    <Dropdown.Menu className="dropdown-menu-dark">
+                      <Dropdown.Item as={Link} to={`/profile/${currentUser.id}`}>
+                        My Profile
+                      </Dropdown.Item>
+                      <Dropdown.Item as={Link} to="/edit-profile">
+                        Edit Profile
+                      </Dropdown.Item>
+                      <Dropdown.Divider />
+                      <Dropdown.Item onClick={handleLogout}>
+                        Logout
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="nav-link">
+                    Login
+                  </Link>
+                  <Link to="/register" className="nav-link">
+                    Sign Up
+                  </Link>
+                </>
+              )}
+            </Nav>
+          </Navbar.Collapse>
+        </Navbar>
       </Container>
-    </Navbar>
+    </header>
   );
 };
 

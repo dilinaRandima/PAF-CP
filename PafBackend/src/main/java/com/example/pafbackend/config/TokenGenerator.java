@@ -1,12 +1,13 @@
 package com.example.pafbackend.config;
 
-import com.example.pafbackend.models.User;
 import com.example.pafbackend.dto.TokenDTO;
+import com.example.pafbackend.models.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -17,13 +18,11 @@ import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import java.util.Collection;
 
+@Slf4j
 @Component
 public class TokenGenerator {
-    private static final Logger logger = LoggerFactory.getLogger(TokenGenerator.class);
     @Autowired
     JwtEncoder accessTokenEncoder;
 
@@ -42,12 +41,12 @@ public class TokenGenerator {
                 .subject(user.getId())
                 .build();
 
-       try{
-           return accessTokenEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
-       }catch (Exception err){
-           logger.error("Error Generating Access Token: {}", err.getMessage(), err);
-           throw err;
-       }
+        try {
+            return accessTokenEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
+        } catch (Exception err) {
+            log.error("Error Generating Access Token: {}", err.getMessage(), err);
+            throw err;
+        }
     }
 
     private String createRefreshToken(Authentication authentication) {
@@ -64,7 +63,7 @@ public class TokenGenerator {
         return refreshTokenEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
     }
 
-    public TokenDTO createToken(Authentication authentication) {
+    public TokenDTO createToken(Authentication authentication, Collection<GrantedAuthority> authorities) {
         if (!(authentication.getPrincipal() instanceof User user)) {
             throw new BadCredentialsException(
                     MessageFormat.format("principal {0} is not of User type", authentication.getPrincipal().getClass())
